@@ -59,8 +59,6 @@ public class InputMaskDemoView extends VerticalLayout {
 		Span maskedValueSpan = new Span();
 		Span unmaskedValueSpan = new Span();
 
-		// begin-source-example
-		// source-example-heading: Simple input mask on text field
 		TextField phoneField = new TextField("Phone");
 		phoneField.setPlaceholder(PHONE_MASK);
 		InputMask phoneFieldMask = new InputMask(PHONE_MASK);
@@ -75,7 +73,6 @@ public class InputMaskDemoView extends VerticalLayout {
 			});
 			message.add(maskedValueSpan, unmaskedValueSpan);
 		});
-		// end-source-example
 
 		phoneField.setId("simple-input-mask-on-text-field");
 
@@ -85,8 +82,6 @@ public class InputMaskDemoView extends VerticalLayout {
 	private void createBasicInputMaskOnDatePickerDemo() {
 		Div message = createMessageDiv("simple-input-mask-on-date-picker-demo-message");
 
-		// begin-source-example
-		// source-example-heading: Simple input mask on date picker field
 		DatePicker dateField = new DatePicker("Date");
 		dateField.setI18n(new DatePickerI18n().setDateFormat(DATE_FORMAT));
 		dateField.setPlaceholder(DATE_FORMAT);
@@ -95,8 +90,7 @@ public class InputMaskDemoView extends VerticalLayout {
 		dateField.addValueChangeListener(ev -> {
 			message.setText("Component value: " + dateField.getValue());
 		});
-		// end-source-example
-
+		
 		dateField.setId("simple-input-mask-on-date-picker");
 
 		add(createCard("Simple input mask on date picker", dateField, message));
@@ -105,8 +99,6 @@ public class InputMaskDemoView extends VerticalLayout {
 	private void createInputMaskOnTextFieldWithBinderDemo() {
 		Div message = createMessageDiv("simple-input-mask-on-text-field-with-binder-demo-message");
 
-		// begin-source-example
-		// source-example-heading: Simple input mask on text field with binder
 		TextField phoneField = new TextField("Phone");
 		phoneField.setPlaceholder(PHONE_MASK);
 		phoneField.setHelperText("Binder validation will be triggered if entered phone number has length < 14.");
@@ -122,7 +114,6 @@ public class InputMaskDemoView extends VerticalLayout {
 		phoneField.addValueChangeListener(ev -> {
 			message.setText("Component value: " + phoneField.getValue());
 		});
-		// end-source-example
 
 		phoneField.setId("simple-input-mask-on-text-field-with-binder");
 
@@ -132,8 +123,6 @@ public class InputMaskDemoView extends VerticalLayout {
 	private void createInputMaskOnTextFielOnGridCellDemo() {
 		ValidationMessage phoneValidationMessage = new ValidationMessage();
 
-		// begin-source-example
-		// source-example-heading: Input mask on text field on grid cell
 		Grid<Person> grid = new Grid<>(Person.class, false);
 		grid.setHeight("200px");
 		Grid.Column<Person> firstNameColumn = grid.addColumn(Person::getFirstName).setHeader("First name")
@@ -168,7 +157,6 @@ public class InputMaskDemoView extends VerticalLayout {
 
 		List<Person> people = this.getPeople();
 		grid.setItems(people);
-		// end-source-example
 
 		grid.setId("input-mask-on-text-field-on-grid-cell");
 
