@@ -38,8 +38,7 @@ class InputMask extends LitElement {
       if ('VAADIN-TEXT-FIELD' === this.parentElement.tagName.toUpperCase()) {
         this.imask = new IMask(this.parentElement, this._generateIMaskOptions(JSON.parse(this.options)));  
       } else {
-        let el = this.parentElement.shadowRoot.querySelector('input');
-        if (!el) el = this.parentElement.querySelector('input');
+        let el = this.parentElement.querySelector('input');
         this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options)));
       }  
       this.parentElement.addEventListener("keydown", e => this._handleKeyEvent(e));    
@@ -81,8 +80,7 @@ class InputMask extends LitElement {
     if('VAADIN-TEXT-FIELD' === this.parentElement.tagName.toUpperCase()){
 		  this.imask = new IMask(this.parentElement, this._generateIMaskOptions(JSON.parse(newOptions)));
     } else {
-      let el = this.parentElement.shadowRoot.querySelector('input'); // retrocompatibility purposes
-      if(!el) el = this.parentElement.querySelector('input');
+      let el = this.parentElement.querySelector('input');
       this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(newOptions)));		
     }      
     this.parentElement.addEventListener("keydown", e => this._handleKeyEvent(e));    
