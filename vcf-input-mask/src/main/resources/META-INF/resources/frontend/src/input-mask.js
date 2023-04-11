@@ -35,14 +35,14 @@ class InputMask extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     if (this.options && !this.imask) {
-      let el = this.parentElement.shadowRoot.querySelector('input');
-      if(el) {
-        this.imask = new IMask(this.parentElement, this._generateIMaskOptions(JSON.parse(this.options)));
+      if ('VAADIN-TEXT-FIELD' === this.parentElement.tagName.toUpperCase()) {
+        this.imask = new IMask(this.parentElement, this._generateIMaskOptions(JSON.parse(this.options)));  
       } else {
-        el = this.parentElement.shadowRoot.querySelector('#input');
-        this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options))); 
-      }
-      el.addEventListener("keydown", e => this._handleKeyEvent(e));          
+        let el = this.parentElement.shadowRoot.querySelector('input');
+        if (!el) el = this.parentElement.querySelector('input');
+        this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options)));
+      }  
+      this.parentElement.addEventListener("keydown", e => this._handleKeyEvent(e));    
     }
   }
 
@@ -78,14 +78,14 @@ class InputMask extends LitElement {
       this.imask = undefined;
     }
 
-    let el = this.parentElement.shadowRoot.querySelector('input');
-    if(el) {
-      this.imask = new IMask(this.parentElement, this._generateIMaskOptions(JSON.parse(this.options)));
+    if('VAADIN-TEXT-FIELD' === this.parentElement.tagName.toUpperCase()){
+		  this.imask = new IMask(this.parentElement, this._generateIMaskOptions(JSON.parse(newOptions)));
     } else {
-      el = this.parentElement.shadowRoot.querySelector('#input');
-      this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options))); 
-    }
-    el.addEventListener("keydown", e => this._handleKeyEvent(e));      
+      let el = this.parentElement.shadowRoot.querySelector('input'); // retrocompatibility purposes
+      if(!el) el = this.parentElement.querySelector('input');
+      this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(newOptions)));		
+    }      
+    this.parentElement.addEventListener("keydown", e => this._handleKeyEvent(e));    
   }
   
   _generateIMaskOptions(maskOptions) {

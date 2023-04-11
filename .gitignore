@@ -31,6 +31,8 @@ webpack.config.js
 webpack.generated.js
 tsconfig.json
 types.d.ts
+vite.generated.ts
+vite.config.ts
 
 # ide configurations
 .vscode/settings.json
@@ -38,3 +40,6 @@ types.d.ts
 .classpath
 .project
 .idea
+
+vcf-input-mask-demo/frontend/generated
+vcf-input-mask-demo/frontend/index.html

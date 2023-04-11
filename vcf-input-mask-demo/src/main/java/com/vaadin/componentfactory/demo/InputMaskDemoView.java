@@ -22,16 +22,17 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValueContext;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 import java.util.Arrays;
 import java.util.List;
@@ -42,16 +43,15 @@ import java.util.List;
  * @author Vaadin Ltd
  */
 @Route("")
-public class InputMaskDemoView extends DemoView {
+@CssImport("./styles/demo.css")
+public class InputMaskDemoView extends VerticalLayout {
 
-	@Override
-	public void initView() {
+	public InputMaskDemoView() {		
+		addClassName("demo-view");		
 		createBasicInputMaskOnTextFieldDemo();
 		createBasicInputMaskOnDatePickerDemo();
 		createInputMaskOnTextFieldWithBinderDemo();
 		createInputMaskOnTextFielOnGridCellDemo();
-
-		addCard("Additional code used in the demo", new Label("These methods are used in the demo."));
 	}
 
 	private void createBasicInputMaskOnTextFieldDemo() {
@@ -79,7 +79,7 @@ public class InputMaskDemoView extends DemoView {
 
 		phoneField.setId("simple-input-mask-on-text-field");
 
-		addCard("Simple input mask on text field", phoneField, message);
+		add(createCard("Simple input mask on text field", phoneField, message));
 	}
 
 	private void createBasicInputMaskOnDatePickerDemo() {
@@ -99,7 +99,7 @@ public class InputMaskDemoView extends DemoView {
 
 		dateField.setId("simple-input-mask-on-date-picker");
 
-		addCard("Simple input mask on date picker", dateField, message);
+		add(createCard("Simple input mask on date picker", dateField, message));
 	}
 
 	private void createInputMaskOnTextFieldWithBinderDemo() {
@@ -126,7 +126,7 @@ public class InputMaskDemoView extends DemoView {
 
 		phoneField.setId("simple-input-mask-on-text-field-with-binder");
 
-		addCard("Simple input mask on text field with binder", phoneField, message);
+		add(createCard("Simple input mask on text field with binder", phoneField, message));
 	}
 
 	private void createInputMaskOnTextFielOnGridCellDemo() {
@@ -172,7 +172,7 @@ public class InputMaskDemoView extends DemoView {
 
 		grid.setId("input-mask-on-text-field-on-grid-cell");
 
-		addCard("Input mask on text field on grid cell", grid, phoneValidationMessage);
+		add(createCard("Input mask on text field on grid cell", grid, phoneValidationMessage));
 	}
 
 	private List<Person> getPeople() {
@@ -181,8 +181,6 @@ public class InputMaskDemoView extends DemoView {
 		return people;
 	}
 
-	// begin-source-example
-	// source-example-heading: Additional code used in the demo
 	/**
 	 * Additional code used in the demo
 	 */
@@ -207,5 +205,13 @@ public class InputMaskDemoView extends DemoView {
 		message.getStyle().set("whiteSpace", "pre");
 		return message;
 	}
-	// end-source-example
+	
+	private Div createCard(String title, Component... components) {		
+		Div card = new Div();
+		card.setWidthFull();
+		card.addClassName("component-card");
+		card.add(new H3(title));
+		card.add(components);
+		return card;
+	}
 }
