@@ -18,6 +18,7 @@ package com.vaadin.componentfactory.demo;
 import static com.vaadin.componentfactory.addons.inputmask.InputMaskOption.option;
 
 import com.vaadin.componentfactory.addons.inputmask.InputMask;
+import com.vaadin.componentfactory.addons.inputmask.InputMaskOption;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -46,8 +47,9 @@ public class InputMaskDemoView extends DemoView {
 
 	@Override
 	public void initView() {
-		createBasicInputMaskOnTextFieldDemo();
-		createBasicInputMaskOnDatePickerDemo();
+		createBasicInputMaskOnTextFieldDemo();	
+		createInputMaskOnTextFieldWithLazyOptionFalseDemo();
+		createBasicInputMaskOnDatePickerDemo();		
 		createInputMaskOnTextFieldWithBinderDemo();
 		createInputMaskOnTextFielOnGridCellDemo();
 
@@ -81,7 +83,35 @@ public class InputMaskDemoView extends DemoView {
 
 		addCard("Simple input mask on text field", phoneField, message);
 	}
+	
+	private void createInputMaskOnTextFieldWithLazyOptionFalseDemo() {
+		Div message = createMessageDiv("input-mask-on-text-field-with-lazy-option-false-demo-message");
+		Span maskedValueSpan = new Span();
+		Span unmaskedValueSpan = new Span();
 
+		// begin-source-example
+		// source-example-heading: Input mask on text field with lazy option false
+		TextField phoneField = new TextField("Phone");
+		InputMask phoneFieldMask = new InputMask(PHONE_MASK, InputMaskOption.lazy(false));
+		phoneFieldMask.extend(phoneField);
+
+		phoneField.addValueChangeListener(ev -> {
+			phoneFieldMask.getMaskedValue(masked -> {
+				maskedValueSpan.setText("Masked value: " + masked);
+			});
+			phoneFieldMask.getUnmaskedValue(unmasked -> {
+				unmaskedValueSpan.setText(" - Unmasked value: " + unmasked);
+			});
+			
+			message.add(maskedValueSpan, unmaskedValueSpan);
+		});
+		// end-source-example
+
+		phoneField.setId("input-mask-on-text-field-with-lazy-option-false");
+
+		addCard("Input mask on text field with lazy option false", phoneField, message);
+	}
+	
 	private void createBasicInputMaskOnDatePickerDemo() {
 		Div message = createMessageDiv("simple-input-mask-on-date-picker-demo-message");
 
@@ -99,7 +129,7 @@ public class InputMaskDemoView extends DemoView {
 
 		dateField.setId("simple-input-mask-on-date-picker");
 
-		addCard("Simple input mask on date picker", dateField, message);
+		addCard("Simple input mask on date picker field", dateField, message);
 	}
 
 	private void createInputMaskOnTextFieldWithBinderDemo() {
@@ -177,7 +207,7 @@ public class InputMaskDemoView extends DemoView {
 
 	private List<Person> getPeople() {
 		List<Person> people = Arrays.asList(new Person("Alex", "Jones", "(333) 445-5859"),
-				new Person("John", "Jackson", "(333) 898-9999"), new Person("Tom", "Ellison", "(333) 455-8978)"));
+				new Person("John", "Jackson", "(333) 898-9999"), new Person("Tom", "Ellison", "(333) 455-8978"));
 		return people;
 	}
 
