@@ -9,7 +9,7 @@
     <packaging>war</packaging>
     <name>Input Maks Add-on Demo</name>
 
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
     <inceptionYear>2023</inceptionYear>
     <organization>
         <name>Vaadin Ltd</name>
