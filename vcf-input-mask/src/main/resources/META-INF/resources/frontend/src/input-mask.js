@@ -34,6 +34,9 @@ class InputMask extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    
+    let parentElement;
+        
     if (this.options && !this.imask) {
       let el = this.parentElement.shadowRoot.querySelector('input');
       if(el) {
@@ -42,10 +45,28 @@ class InputMask extends LitElement {
         el = this.parentElement.shadowRoot.querySelector('#input');
         this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options))); 
       }
-      el.addEventListener("keydown", e => this._handleKeyEvent(e));          
-    }
-  }
-
+      el.addEventListener("keydown", e => this._handleKeyEvent(e)); 
+      
+      // need to keep track of parent element to be able to re-set caret position later
+      parentElement = this.parentElement;
+    }      
+    
+    if(this.imask) {
+		// override _onInput function and re-set real caret position from imask
+		let customOnInput = this.imask._onInput;
+	    this.imask._onInput = function (e) {
+			customOnInput(e);
+			let imaskSelectionStart = parentElement.querySelector("input-mask").__imask.selectionStart;			
+			e.target.inputElement.setSelectionRange(imaskSelectionStart, imaskSelectionStart);			
+		}	
+		
+		this.imask.el.bindEvents({
+	      input: this.imask._onInput,
+	    }); 
+		
+	}
+  }    
+     
   disconnectedCallback() {
     super.disconnectedCallback();
     if (this.imask) {
