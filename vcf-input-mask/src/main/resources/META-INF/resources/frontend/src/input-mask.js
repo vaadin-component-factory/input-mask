@@ -76,6 +76,7 @@ class InputMask extends LitElement {
   }
   
   _handleKeyEvent(ev) {
+	const backspace = ev.code == "Backspace" || ev.keyCode == 8;
     const spaceBar = ev.key == " " || ev.code == "Space" || ev.keyCode == 32;
     const selectAll = ev.target.selectionEnd > ev.target.selectionStart && ev.target.selectionEnd == ev.target.value.length;
     if (spaceBar && selectAll) {
@@ -84,7 +85,15 @@ class InputMask extends LitElement {
       this.imask.updateValue();
     } else if (spaceBar && ev.target.selectionEnd == 0) {
       ev.preventDefault();
-    }
+    } else if (backspace && !this.imask.masked.lazy) {
+	  if (this.imask.masked._blocks.at(ev.target.selectionStart-1).isFixed) {
+		var i = 1;
+		while(this.imask.masked._blocks.at(ev.target.selectionStart-i).isFixed){
+			i++;
+		}	
+		ev.target.setSelectionRange(ev.target.selectionStart-i, ev.target.selectionEnd-i);
+	  }
+	}
   }
 
   _optionsChanged(newOptions, oldOptions) {
