@@ -18,6 +18,7 @@ package com.vaadin.componentfactory.demo;
 import static com.vaadin.componentfactory.addons.inputmask.InputMaskOption.option;
 
 import com.vaadin.componentfactory.addons.inputmask.InputMask;
+import com.vaadin.componentfactory.addons.inputmask.InputMaskOption;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -28,11 +29,13 @@ import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import java.util.Arrays;
 import java.util.List;
@@ -52,8 +55,39 @@ public class InputMaskDemoView extends VerticalLayout {
 		createBasicInputMaskOnDatePickerDemo();
 		createInputMaskOnTextFieldWithBinderDemo();
 		createInputMaskOnTextFielOnGridCellDemo();
+		createNumberInputMaskOnTextFieldDemo();
 	}
 
+	private void createNumberInputMaskOnTextFieldDemo() {
+		Div message = createMessageDiv("number-input-mask-on-text-field-demo-message");
+		Span maskedValueSpan = new Span();
+		Span unmaskedValueSpan = new Span();
+
+		TextField numberField = new TextField("Number");
+		InputMask inputMask = new InputMask("Number", true,
+				InputMaskOption.option("scale", 2),
+				InputMaskOption.option("thousandsSeparator", "-"),
+				InputMaskOption.option("radix", '.')
+		);
+
+		inputMask
+				.extend(numberField);
+		numberField.setValueChangeMode(ValueChangeMode.ON_BLUR);
+
+		numberField.addValueChangeListener(ev -> {
+			inputMask.getMaskedValue(masked -> {
+				maskedValueSpan.setText("Masked value: " + masked);
+			});
+			inputMask.getUnmaskedValue(unmasked -> {
+				unmaskedValueSpan.setText(" - Unmasked value: " + unmasked);
+			});
+			message.add(maskedValueSpan, unmaskedValueSpan);
+		});
+
+		numberField.setId("number-input-mask-on-text-field");
+
+		add(createCard("Simple input mask on text field", numberField, message));
+	}
 	private void createBasicInputMaskOnTextFieldDemo() {
 		Div message = createMessageDiv("simple-input-mask-on-text-field-demo-message");
 		Span maskedValueSpan = new Span();

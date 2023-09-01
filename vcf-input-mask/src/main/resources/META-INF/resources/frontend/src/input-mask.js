@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { LitElement } from 'lit-element';
+import { LitElement } from 'lit';
 import IMask from 'imask';
 
 /**
@@ -41,7 +41,7 @@ class InputMask extends LitElement {
         let el = this.parentElement.querySelector('input');
         this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options)));
       }  
-      this.parentElement.addEventListener("keydown", e => this._handleKeyEvent(e));    
+      this.parentElement.addEventListener("keydown", e => this._handleKeyEvent(e));
     }
   }
 

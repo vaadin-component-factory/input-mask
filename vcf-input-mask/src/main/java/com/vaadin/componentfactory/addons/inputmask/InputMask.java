@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Tag("input-mask")
-@NpmPackage(value = "imask", version = "6.5.0")
+@NpmPackage(value = "imask", version = "7.1.3")
 @JsModule("./src/input-mask.js")
 public class InputMask extends Component {
 
