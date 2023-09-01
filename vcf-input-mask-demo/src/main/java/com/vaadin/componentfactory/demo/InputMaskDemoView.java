@@ -56,6 +56,7 @@ public class InputMaskDemoView extends VerticalLayout {
 		createInputMaskOnTextFieldWithBinderDemo();
 		createInputMaskOnTextFielOnGridCellDemo();
 		createNumberInputMaskOnTextFieldDemo();
+		createRegExpInputMaskOnTextFieldDemo();
 	}
 
 	private void createNumberInputMaskOnTextFieldDemo() {
@@ -86,8 +87,34 @@ public class InputMaskDemoView extends VerticalLayout {
 
 		numberField.setId("number-input-mask-on-text-field");
 
-		add(createCard("Simple input mask on text field", numberField, message));
+		add(createCard("Simple number mask on text field", numberField, message));
 	}
+
+	private void createRegExpInputMaskOnTextFieldDemo() {
+		Div message = createMessageDiv("regexp-input-mask-on-text-field-demo-message");
+		Span maskedValueSpan = new Span();
+		Span unmaskedValueSpan = new Span();
+
+		TextField numberField = new TextField("Regexp digits");
+		InputMask inputMask = new InputMask("/^\\d+$/", true);
+
+		inputMask.extend(numberField);
+
+		numberField.addValueChangeListener(ev -> {
+			inputMask.getMaskedValue(masked -> {
+				maskedValueSpan.setText("Masked value: " + masked);
+			});
+			inputMask.getUnmaskedValue(unmasked -> {
+				unmaskedValueSpan.setText(" - Unmasked value: " + unmasked);
+			});
+			message.add(maskedValueSpan, unmaskedValueSpan);
+		});
+
+		numberField.setId("regexp-input-mask-on-text-field");
+
+		add(createCard("Simple regexp input mask on text field", numberField, message));
+	}
+
 	private void createBasicInputMaskOnTextFieldDemo() {
 		Div message = createMessageDiv("simple-input-mask-on-text-field-demo-message");
 		Span maskedValueSpan = new Span();
