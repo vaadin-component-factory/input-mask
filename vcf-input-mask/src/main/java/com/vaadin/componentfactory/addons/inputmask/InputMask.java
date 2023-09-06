@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 import java.lang.ref.WeakReference;
@@ -74,7 +75,13 @@ public class InputMask extends Component {
             getElement().setProperty("options", objectMapper.writeValueAsString(options));
 
             extended = new WeakReference<Component>(component);
-            component.getElement().appendChild(getElement());
+            
+            Element componentElement = component.getElement();
+            // remove any existing input-mask element attached to component
+            componentElement.getChildren()
+                    .filter(child -> TAG_NAME.equalsIgnoreCase(child.getTag()))
+                    .findAny().ifPresent(componentElement::removeChild);
+            componentElement.appendChild(getElement());
             
             if (HasValue.class.isAssignableFrom(component.getClass())) {
                 valueChangeRegistration = HasValue.class.cast(component).addValueChangeListener(e -> {
