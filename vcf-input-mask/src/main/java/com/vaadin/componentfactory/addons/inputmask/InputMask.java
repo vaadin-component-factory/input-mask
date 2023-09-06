@@ -18,6 +18,7 @@ import static com.vaadin.componentfactory.addons.inputmask.InputMaskOption.optio
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -31,15 +32,18 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Tag("input-mask")
+@Tag(InputMask.TAG_NAME)
 @NpmPackage(value = "imask", version = "7.1.3")
 @JsModule("./src/input-mask.js")
 public class InputMask extends Component {
 
 	private static final Logger logger = LoggerFactory.getLogger(InputMask.class);
 
+    static final String TAG_NAME = "input-mask";
+
 	private WeakReference<Component> extended;
 	private Registration attachRegistration = null;
+    private Registration valueChangeRegistration;
 	private List<InputMaskOption> options;
 
 	public InputMask(String mask, InputMaskOption... options) {
@@ -63,30 +67,43 @@ public class InputMask extends Component {
 		}
 	}
 
-	private void extend(Component component, UI ui) {
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			getElement().setProperty("options", objectMapper.writeValueAsString(options));
+    @SuppressWarnings("unchecked")
+    private void extend(Component component, UI ui) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            getElement().setProperty("options", objectMapper.writeValueAsString(options));
 
-			extended = new WeakReference<Component>(component);
-			component.getElement().appendChild(getElement());			
-			
-			
-		} catch (JsonProcessingException ex) {
-			logger.error("Error serializing InputMask options", ex);
-		}
-	}
+            extended = new WeakReference<Component>(component);
+            component.getElement().appendChild(getElement());
+            
+            if (HasValue.class.isAssignableFrom(component.getClass())) {
+                valueChangeRegistration = HasValue.class.cast(component).addValueChangeListener(e -> {
+                    if (!e.isFromClient()) {
+                        getElement().executeJs("this.setValue($0)",
+                                e.getValue() == null ? "" : e.getValue().toString());
+                    }
+                });
+            }
+        } catch (JsonProcessingException ex) {
+            logger.error("Error serializing InputMask options", ex);
+        }
+    }
 
-	public void remove() {
-		if (attachRegistration != null) {
-			attachRegistration.remove();
-			attachRegistration = null;
-		}
-		if (extended != null) {
-			getElement().removeFromParent();
-			extended.clear();
-		}
-	}
+    public void remove() {
+        if (attachRegistration != null) {
+            attachRegistration.remove();
+            attachRegistration = null;
+        }
+        if (valueChangeRegistration != null) {
+            valueChangeRegistration.remove();
+            valueChangeRegistration = null;
+        }
+        if (extended != null) {
+            getElement().removeFromParent();
+            extended.clear();
+        }
+        extended = null;
+    }
 
 	public void getUnmaskedValue(SerializableConsumer<String> consumer) {
         this.getElement().executeJs("return this.getUnmaskedValue()").then(String.class, value -> {
