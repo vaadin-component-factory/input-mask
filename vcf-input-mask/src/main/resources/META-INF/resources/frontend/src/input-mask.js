@@ -121,7 +121,10 @@ class InputMask extends LitElement {
   getMaskedValue() {
     return this.imask ? this.imask.value : "";
   }
-  
+ 
+  setValue(value){
+    this.imask.value = value;
+  }
 }
 
 window.customElements.define(InputMask.is, InputMask);
