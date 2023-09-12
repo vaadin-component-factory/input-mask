@@ -86,8 +86,11 @@ public class InputMask extends Component {
             if (HasValue.class.isAssignableFrom(component.getClass())) {
                 valueChangeRegistration = HasValue.class.cast(component).addValueChangeListener(e -> {
                     if (!e.isFromClient()) {
-                        getElement().executeJs("this.setValue($0)",
-                                e.getValue() == null ? "" : e.getValue().toString());
+                        if (e.getValue() == null) {
+                            getElement().executeJs("this.setValue('')");
+                        } else {
+                            getElement().executeJs("this.setValue($0.inputElement.value)", component.getElement());
+                        }
                     }
                 });
             }
