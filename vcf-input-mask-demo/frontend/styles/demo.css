@@ -12,4 +12,13 @@
 	max-width: 800px;
 	margin-left: auto;
     margin-right: auto;
+    margin-top: 30px;
+}
+
+.component-card p {
+	font-size: var(--lumo-font-size-s);
+}
+
+.buttons-layout {
+	margin-top: 10px;
 }
