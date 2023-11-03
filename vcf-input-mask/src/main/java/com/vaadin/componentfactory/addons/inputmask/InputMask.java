@@ -14,15 +14,17 @@
 package com.vaadin.componentfactory.addons.inputmask;
 
 import static com.vaadin.componentfactory.addons.inputmask.InputMaskOption.option;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -33,10 +35,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("serial")
 @Tag(InputMask.TAG_NAME)
 @NpmPackage(value = "imask", version = "7.1.3")
 @JsModule("./src/input-mask.js")
-public class InputMask extends Component {
+public class InputMask extends AbstractSinglePropertyField<InputMask, String> implements HasValidation {
 
 	private static final Logger logger = LoggerFactory.getLogger(InputMask.class);
 
@@ -52,6 +55,7 @@ public class InputMask extends Component {
 	}
 
 	public InputMask(String mask, boolean evalMask, InputMaskOption... options) {
+	    super("unmaskedValue", "", false);
 		this.options = new ArrayList<>();
 		this.options.add(option("mask", mask, evalMask));
 		if (options != null) {
@@ -60,9 +64,10 @@ public class InputMask extends Component {
 	}
 
 	public void extend(Component component) {
+	    extended = new WeakReference<Component>(component);
 		if (component.getUI().isPresent()) {
 			extend(component, component.getUI().get());
-		} else {
+		} else {		    
 			attachRegistration = component.addAttachListener(event -> extend(component, event.getUI()));
 			component.addDetachListener(event -> remove());
 		}
@@ -73,8 +78,6 @@ public class InputMask extends Component {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             getElement().setProperty("options", objectMapper.writeValueAsString(options));
-
-            extended = new WeakReference<Component>(component);
             
             Element componentElement = component.getElement();
             // remove any existing input-mask element attached to component
@@ -123,4 +126,45 @@ public class InputMask extends Component {
 			consumer.accept(value);
 		});
     }
-}
+	
+	@Override
+    public void setErrorMessage(String errorMessage) {
+        if (extendedHasValidation()) {
+            ((HasValidation) extended.get()).setErrorMessage(errorMessage);
+        }
+    }
+
+    @Override
+    public String getErrorMessage() {
+        return extendedHasValidation() ? ((HasValidation) extended.get()).getErrorMessage() : null;
+    }
+
+    @Override
+    public void setInvalid(boolean invalid) {
+        if (extendedHasValidation()) {
+            ((HasValidation) extended.get()).setInvalid(invalid);
+        }        
+    }
+
+    @Override
+    public boolean isInvalid() {
+        return extendedHasValidation() ? ((HasValidation) extended.get()).isInvalid() : false;
+    }
+    
+    private boolean extendedHasValidation() {
+        return extended != null && extended.get() != null && extended.get() instanceof HasValidation;
+    }
+  
+    @Override
+    protected void setPresentationValue(String newPresentationValue) {
+      if (extended != null && extended.get() != null) {
+        if (!TextField.class.isAssignableFrom(extended.get().getClass())) {
+          throw new IllegalArgumentException(
+              "Only TextField is supported for unmasked value binding.");
+        } else {
+          TextField.class.cast(extended.get()).setValue(newPresentationValue);
+        }
+      }
+      super.setPresentationValue(newPresentationValue);
+    }
+}    
