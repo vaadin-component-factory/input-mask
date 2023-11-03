@@ -30,27 +30,51 @@ class InputMask extends LitElement {
         type: Object
       }
     };
+  }  
+        
+  get unmaskedValue() {
+	return this.getUnmaskedValue();
+  }  
+    
+  set unmaskedValue(value) {}
+  
+  /** Initialize imask property */
+  _initImask(){
+	this._parentElement = this.parentElement;
+	if ('VAADIN-TEXT-FIELD' === this.parentElement.tagName.toUpperCase()) {
+	  this.imask = new IMask(this.parentElement, this._generateIMaskOptions(JSON.parse(this.options)));  
+	  this._boundHandleUnmaskedValueChange = this._handleUnmaskedValueChange.bind(this);
+	  this._parentElement.addEventListener("change", this._boundHandleUnmaskedValueChange);
+	} else {
+	  const el = this.parentElement.querySelector('input');
+	  this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options)));
+	  this._boundHandleInputMaskUnmaskedValueChanged = this._handleInputMaskUnmaskedValueChanged.bind(this);
+	  this._parentElement.addEventListener("value-changed", this._boundHandleInputMaskUnmaskedValueChanged);  
+	} 
+	this._boundHandleKeyEvent = this._handleKeyEvent.bind(this);
+	this._parentElement.addEventListener("keydown", this._boundHandleKeyEvent);  
   }
-
+  
   connectedCallback() {
     super.connectedCallback();
     if (this.options && !this.imask) {
-      if ('VAADIN-TEXT-FIELD' === this.parentElement.tagName.toUpperCase()) {
-        this.imask = new IMask(this.parentElement, this._generateIMaskOptions(JSON.parse(this.options)));  
-      } else {
-        let el = this.parentElement.querySelector('input');
-        this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options)));
-      }  
-      this.parentElement.addEventListener("keydown", e => this._handleKeyEvent(e));
+	  this._initImask();
     }
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    if (this.imask) {
-      this.imask.destroy();
-      this.imask = undefined;
-    }
+    this._cleanUp();    
+  }
+  
+  _cleanUp() {
+	if (this.imask) {
+	  this._parentElement.removeEventListener("change", this._boundHandleUnmaskedValueChange);
+	  this._parentElement.removeEventListener("value-changed", this._boundHandleInputMaskUnmaskedValueChanged);  
+	  this._parentElement.removeEventListener("keydown", this._boundHandleKeyEvent);
+	  this.imask.destroy();
+	  this.imask = undefined;
+	}
   }
   
   _handleKeyEvent(ev) {
@@ -62,7 +86,24 @@ class InputMask extends LitElement {
       this.imask.updateValue();
     } else if (spaceBar && ev.target.selectionEnd == 0) {
       ev.preventDefault();
-    }
+   	}
+  }  
+ 
+  /** Update imask value on field "value-changed" event */ 	   
+  _handleInputMaskUnmaskedValueChanged(ev) {    
+	this.imask.value = ev.target.inputElement.value
+	this.imask.updateValue();	
+  }
+  
+  /** Handle imask's unmasked value */
+  _handleUnmaskedValueChange(){
+	const event = new CustomEvent("unmasked-value-changed", {
+	    detail: this.imask.unmaskedValue,
+	    composed: true,
+	    cancelable: true,
+	    bubbles: true
+	});
+	this.dispatchEvent(event);	
   }
 
   _optionsChanged(newOptions, oldOptions) {
@@ -71,19 +112,8 @@ class InputMask extends LitElement {
     }
 
     this.options = newOptions;
-
-    if (this.imask) {
-      this.imask.destroy();
-      this.imask = undefined;
-    }
-
-    if('VAADIN-TEXT-FIELD' === this.parentElement.tagName.toUpperCase()){
-		  this.imask = new IMask(this.parentElement, this._generateIMaskOptions(JSON.parse(newOptions)));
-    } else {
-      let el = this.parentElement.querySelector('input');
-      this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(newOptions)));		
-    }      
-    this.parentElement.addEventListener("keydown", e => this._handleKeyEvent(e));    
+    this._cleanUp();
+	this._initImask();
   }
   
   _generateIMaskOptions(maskOptions) {
@@ -123,8 +153,11 @@ class InputMask extends LitElement {
   }
  
   setValue(value){
-    this.imask.value = value;
+	if(this.imask) {
+      this.imask.value = value;
+    }
   }
+  
 }
 
 window.customElements.define(InputMask.is, InputMask);
