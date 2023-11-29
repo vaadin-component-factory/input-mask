@@ -42,9 +42,13 @@ class InputMask extends LitElement {
   _initImask(){
 	this._parentElement = this.parentElement;
 	if ('VAADIN-TEXT-FIELD' === this.parentElement.tagName.toUpperCase()) {
-	  this.imask = new IMask(this.parentElement, this._generateIMaskOptions(JSON.parse(this.options)));  
+	  this.imask = new IMask(this.parentElement.inputElement, this._generateIMaskOptions(JSON.parse(this.options)));  
 	  this._boundHandleUnmaskedValueChange = this._handleUnmaskedValueChange.bind(this);
 	  this._parentElement.addEventListener("change", this._boundHandleUnmaskedValueChange);
+	  
+	  this._boundHandleInputValueChange = this._handleInputValueChange.bind(this);
+	  this._parentElement.inputElement.addEventListener("change", this._boundHandleInputValueChange);
+  
 	} else {
 	  const el = this.parentElement.querySelector('input');
 	  this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options)));
@@ -88,6 +92,12 @@ class InputMask extends LitElement {
       ev.preventDefault();
    	}
   }  
+ 
+  /** Update textfield value on input update */	
+  _handleInputValueChange(e) {
+	 this._parentElement.value = this.imask.value;
+	 this._parentElement._onChange(e);
+  }
  
   /** Update imask value on field "value-changed" event */ 	   
   _handleInputMaskUnmaskedValueChanged(ev) {    
