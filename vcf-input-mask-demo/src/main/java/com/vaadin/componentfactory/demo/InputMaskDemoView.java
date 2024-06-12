@@ -20,6 +20,7 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
@@ -41,6 +42,7 @@ public class InputMaskDemoView extends BaseDemoView {
     createBasicInputMaskOnDatePickerDemo();
     createNumberInputMaskOnTextFieldDemo();
     createRegExpInputMaskOnTextFieldDemo();
+    createBasicInputMaskOnTextAreaDemo();
   }
 
   private void createNumberInputMaskOnTextFieldDemo() {
@@ -138,4 +140,29 @@ public class InputMaskDemoView extends BaseDemoView {
     add(createCard("Simple input mask on date picker", dateField, message));
   }
 
+  private void createBasicInputMaskOnTextAreaDemo() {
+    Div message = createMessageDiv("simple-input-mask-on-text-area-demo-message");
+    Span maskedValueSpan = new Span();
+    Span unmaskedValueSpan = new Span();
+
+
+    TextArea phoneField = new TextArea("Phone");
+    phoneField.setPlaceholder(PHONE_MASK);
+    InputMask phoneFieldMask = new InputMask(PHONE_MASK);
+    phoneFieldMask.extend(phoneField);
+
+    phoneField.addValueChangeListener(ev -> {
+      phoneFieldMask.getMaskedValue(masked -> {
+        maskedValueSpan.setText("Masked value: " + masked);
+      });
+      phoneFieldMask.getUnmaskedValue(unmasked -> {
+        unmaskedValueSpan.setText(" - Unmasked value: " + unmasked);
+      });
+      message.add(maskedValueSpan, unmaskedValueSpan);
+    });
+
+    phoneField.setId("simple-input-mask-on-text-area");
+
+    add(createCard("Simple input mask on text area", phoneField, message));
+  }
 }
