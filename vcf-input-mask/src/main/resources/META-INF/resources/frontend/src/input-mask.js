@@ -41,7 +41,7 @@ class InputMask extends LitElement {
   /** Initialize imask property */
   _initImask(){
 	this._parentElement = this.parentElement;
-	if ('VAADIN-TEXT-FIELD' === this.parentElement.tagName.toUpperCase()) {
+	if (['VAADIN-TEXT-FIELD', 'VAADIN-TEXT-AREA'].includes(this.parentElement.tagName.toUpperCase())) {
 	  this.imask = new IMask(this.parentElement.inputElement, this._generateIMaskOptions(JSON.parse(this.options)));  
 	  this._boundHandleUnmaskedValueChange = this._handleUnmaskedValueChange.bind(this);
 	  this._parentElement.addEventListener("change", this._boundHandleUnmaskedValueChange);
