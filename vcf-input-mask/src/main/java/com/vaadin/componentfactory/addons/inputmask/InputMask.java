@@ -14,8 +14,6 @@
 package com.vaadin.componentfactory.addons.inputmask;
 
 import static com.vaadin.componentfactory.addons.inputmask.InputMaskOption.option;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValidation;
@@ -28,6 +26,10 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,7 +96,7 @@ public class InputMask extends AbstractSinglePropertyField<InputMask, String> im
                     }
                 });
             }
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             logger.error("Error serializing InputMask options", ex);
         }
     }

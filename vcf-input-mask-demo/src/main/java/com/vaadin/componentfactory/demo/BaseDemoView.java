@@ -12,7 +12,6 @@ import com.vaadin.flow.data.binder.ValueContext;
  * Base code used in the demo.
  */
 @SuppressWarnings("serial")
-@CssImport("./styles/demo.css")
 public class BaseDemoView extends Div {
  
   protected static final String PHONE_MASK = "(000) 000-0000";
