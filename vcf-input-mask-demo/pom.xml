@@ -8,6 +8,7 @@
     <artifactId>vcf-input-mask-demo</artifactId>
     <packaging>war</packaging>
     <name>Input Maks Add-on Demo</name>
+
     <version>3.1.0</version>
     <inceptionYear>2023</inceptionYear>
     <organization>
