@@ -31,10 +31,6 @@ public class MainLayout extends AppLayout {
         new VerticalLayout(basicUseDemo, binderWithMaskedValueDemo, binderWithUnmaskedValueDemo,
             allowWhitespaceDemo, setNewMaskDemo);
 
-    final VerticalLayout menuLayout =
-        new VerticalLayout(basicUseDemo, binderWithMaskedValueDemo, binderWithUnmaskedValueDemo,
-            allowWhitespaceDemo);
-
     addToDrawer(menuLayout);
     addToNavbar(drawerToggle);
   }
