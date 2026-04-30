@@ -42,6 +42,15 @@ public class SetNewMaskPlaywrightIT extends AbstractPlaywrightTest {
   private static final String SELECT_SELECTOR =
       "vaadin-select#set-new-mask-select";
 
+  private static final String WS_FIELD_INPUT_SELECTOR =
+      "vaadin-text-field#set-new-mask-whitespace-text-field input";
+  private static final String WS_INPUT_MASK_FOR_FIELD =
+      "vaadin-text-field#set-new-mask-whitespace-text-field input-mask";
+  private static final String WS_SELECT_SELECTOR =
+      "vaadin-select#set-new-mask-whitespace-select";
+  private static final String WS_TOGGLE_SELECTOR =
+      "vaadin-checkbox#set-new-mask-whitespace-toggle";
+
   @Test
   public void initialMaskFormatsValueAsUsPhoneNumber() {
     openDemo();
@@ -88,33 +97,79 @@ public class SetNewMaskPlaywrightIT extends AbstractPlaywrightTest {
     assertThat(input).hasValue("(555) 123-4567");
   }
 
+  @Test
+  public void whitespaceToggleAppliesAfterMaskSwitch() {
+    openDemo();
+
+    Locator input = page.locator(WS_FIELD_INPUT_SELECTOR);
+
+    // Default state: whitespace toggle OFF, regex mask /^.*$/. The wrapper
+    // intercepts the leading space, so typing Space + a should yield "a".
+    input.click();
+    input.press("Space");
+    input.pressSequentially("a");
+    assertThat(input).hasValue("a");
+
+    // Enable whitespace, then switch to the wildcard pattern mask. The demo
+    // clears the field on mask change, so we get a clean slate.
+    enableWhitespaceToggle();
+    selectWhitespaceMask("*-00000000-a");
+
+    // First mask slot is the IMask wildcard "*", which accepts a space when
+    // the wrapper does not intercept it. Typing Space + 1 should produce
+    // " -1" (wildcard space, literal "-", first digit).
+    input.click();
+    input.press("Space");
+    input.pressSequentially("1");
+    assertThat(input).hasValue(" -1");
+  }
+
   private void openDemo() {
     page.navigate(baseUrl() + DEMO_PATH);
-    // Wait until the input-mask wrapper is connected. The element itself has
-    // no visible box, so we wait for the ATTACHED state rather than VISIBLE.
+    // Wait until both input-mask wrappers are connected. The elements have no
+    // visible box, so we wait for the ATTACHED state rather than VISIBLE.
     page.locator(INPUT_MASK_FOR_FIELD).waitFor(
+        new Locator.WaitForOptions().setState(WaitForSelectorState.ATTACHED));
+    page.locator(WS_INPUT_MASK_FOR_FIELD).waitFor(
         new Locator.WaitForOptions().setState(WaitForSelectorState.ATTACHED));
   }
 
   private void selectMask(String maskLabel) {
+    selectMaskOn(SELECT_SELECTOR, INPUT_MASK_FOR_FIELD, maskLabel);
+  }
+
+  private void selectWhitespaceMask(String maskLabel) {
+    selectMaskOn(WS_SELECT_SELECTOR, WS_INPUT_MASK_FOR_FIELD, maskLabel);
+  }
+
+  private void selectMaskOn(String selectSelector, String inputMaskSelector, String maskLabel) {
     // Open the Vaadin Select overlay and click the matching item. The dropdown
     // items render inside vaadin-select-list-box, so scope the lookup there to
     // avoid colliding with the copy of the selected item that Vaadin renders
     // inside the value button. The select round-trips through the server, so
     // wait until the wrapper has actually re-initialised IMask with the new
     // mask before continuing.
-    page.locator(SELECT_SELECTOR + " vaadin-select-value-button").click();
+    page.locator(selectSelector + " vaadin-select-value-button").click();
     page.locator("vaadin-select-list-box vaadin-select-item")
         .getByText(maskLabel, new com.microsoft.playwright.Locator.GetByTextOptions().setExact(true))
         .click();
     page.waitForFunction(
-        "label => {"
-            + "  const el = document.querySelector('" + INPUT_MASK_FOR_FIELD + "');"
+        "args => {"
+            + "  const el = document.querySelector(args.selector);"
             + "  if (!el || !el.imask) return false;"
             + "  const opts = JSON.parse(el.options || '[]');"
             + "  const maskOpt = opts.find(o => o.key === 'mask');"
-            + "  return maskOpt && maskOpt.value === label;"
+            + "  return maskOpt && maskOpt.value === args.label;"
             + "}",
-        maskLabel);
+        java.util.Map.of("selector", inputMaskSelector, "label", maskLabel));
+  }
+
+  private void enableWhitespaceToggle() {
+    page.locator(WS_TOGGLE_SELECTOR).click();
+    // Toggle round-trips through the server before the property flips on the
+    // wrapper. Wait until the change is visible on the client.
+    page.waitForFunction(
+        "selector => document.querySelector(selector).allowWhitespace === true",
+        WS_INPUT_MASK_FOR_FIELD);
   }
 }

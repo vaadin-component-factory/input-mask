@@ -123,6 +123,17 @@ time are kept. Use the
 `setMask(String mask, boolean evalMask, InputMaskOption... options)` overload
 when you also need to replace those.
 
+> **Security note on `evalMask`** &mdash; the `boolean evalMask` parameter
+> exists on both the `InputMask(String, boolean, ...)` constructor and the
+> `setMask(String, boolean, ...)` overloads. When set to `true`, the mask
+> string is passed to JavaScript `eval()` on the client so IMask can receive
+> a regex literal (e.g. `"/^\\d+$/"`) or a built-in like `"Number"`. Only
+> pass developer-authored, trusted mask strings &mdash; never values that come
+> from end-user input or any other untrusted source &mdash; or arbitrary
+> JavaScript will run in the browser. The default `setMask(String)` and
+> `new InputMask(String, ...)` paths do not eval the mask and are safe to
+> use with untrusted strings (modulo whatever IMask itself does with them).
+
 ### Allowing whitespace input
 
 By default, the wrapper intercepts the space bar in two situations: pressing space when the caret is at position 0 is cancelled, and pressing space while the whole value is selected clears the field. This makes the component unsuitable for masks where a space is a legitimate part of the value (for example a name, a sentence, or a pattern with the IMask `*` wildcard).
