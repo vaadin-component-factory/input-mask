@@ -33,7 +33,7 @@ class InputMask extends LitElement {
       }
     };
   }
-
+        
   get unmaskedValue() {
 	return this.getUnmaskedValue();
   }
