@@ -15,29 +15,29 @@
  */
 package com.vaadin.componentfactory.addons.inputmask;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.textfield.TextField;
 import net.jcip.annotations.NotThreadSafe;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @NotThreadSafe
 public class InputMaskTest {
 
 	private UI ui;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		ui = new UI();
 		UI.setCurrent(ui);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		UI.setCurrent(null);
 	}
@@ -58,10 +58,10 @@ public class InputMaskTest {
 	public void inputMask_allowWhitespace_defaultsToFalse() {
 		InputMask inputMask = new InputMask("/^.*$/", true);
 
-		assertFalse("allowWhitespace should default to false to keep the existing behaviour",
-				inputMask.isAllowWhitespace());
-		assertFalse("allowWhitespace property should not be reflected to the element by default",
-				inputMask.getElement().getProperty("allowWhitespace", false));
+		assertFalse(inputMask.isAllowWhitespace(),
+				"allowWhitespace should default to false to keep the existing behaviour");
+		assertFalse(inputMask.getElement().getProperty("allowWhitespace", false),
+				"allowWhitespace property should not be reflected to the element by default");
 	}
 
 	@Test
@@ -70,13 +70,13 @@ public class InputMaskTest {
 
 		inputMask.setAllowWhitespace(true);
 		assertTrue(inputMask.isAllowWhitespace());
-		assertTrue("allowWhitespace property should be reflected to the element when enabled",
-				inputMask.getElement().getProperty("allowWhitespace", false));
+		assertTrue(inputMask.getElement().getProperty("allowWhitespace", false),
+				"allowWhitespace property should be reflected to the element when enabled");
 
 		inputMask.setAllowWhitespace(false);
 		assertFalse(inputMask.isAllowWhitespace());
-		assertFalse("allowWhitespace property should be reflected to the element when disabled",
-				inputMask.getElement().getProperty("allowWhitespace", true));
+		assertFalse(inputMask.getElement().getProperty("allowWhitespace", true),
+				"allowWhitespace property should be reflected to the element when disabled");
 	}
 
 	@Test
@@ -87,10 +87,10 @@ public class InputMaskTest {
 		inputMask.setAllowWhitespace(true);
 		inputMask.extend(textField);
 
-		assertTrue("allowWhitespace must remain enabled after extending a component",
-				inputMask.isAllowWhitespace());
-		assertTrue("allowWhitespace property should still be reflected to the element after extend",
-				inputMask.getElement().getProperty("allowWhitespace", false));
+		assertTrue(inputMask.isAllowWhitespace(),
+				"allowWhitespace must remain enabled after extending a component");
+		assertTrue(inputMask.getElement().getProperty("allowWhitespace", false),
+				"allowWhitespace property should still be reflected to the element after extend");
 	}
 
 }
