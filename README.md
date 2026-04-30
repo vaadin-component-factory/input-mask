@@ -101,6 +101,24 @@ binder.forField(phoneFieldMask)
 binder.setBean(new Person());
 ```
 
+### Allowing whitespace input
+
+By default, the wrapper intercepts the space bar in two situations: pressing space when the caret is at position 0 is cancelled, and pressing space while the whole value is selected clears the field. This makes the component unsuitable for masks where a space is a legitimate part of the value (for example a name, a sentence, or a pattern with the IMask `*` wildcard).
+
+Call `setAllowWhitespace(true)` to opt in to whitespace input. When enabled, the wrapper does not intercept the space bar and lets IMask decide whether to accept the character based on the configured mask. The same applies to clipboard paste: spaces are kept when the mask permits them.
+
+```java
+TextField referenceField = new TextField("Reference code");
+InputMask referenceMask = new InputMask("*-00000000-a");
+referenceMask.extend(referenceField);
+
+// the first character of the mask ("*") accepts any character,
+// including a whitespace, once the toggle below is on
+referenceMask.setAllowWhitespace(true);
+```
+
+The default value is `false`, so existing applications that rely on the "select-all + space = clear" shortcut keep their current behaviour.
+
 ## License & Author
 
 This Add-on is distributed under [Apache Licence 2.0](https://github.com/vaadin-component-factory/input-mask/blob/main/LICENSE).

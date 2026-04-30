@@ -9,7 +9,7 @@
     <packaging>war</packaging>
     <name>Input Maks Add-on Demo</name>
 
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <inceptionYear>2023</inceptionYear>
     <organization>
         <name>Vaadin Ltd</name>
@@ -17,7 +17,7 @@
     </organization>
 
     <properties>
-        <vaadin.version>25.0.0</vaadin.version>
+        <vaadin.version>25.0.9</vaadin.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -45,6 +45,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-dev</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!-- Component -->
@@ -110,8 +111,8 @@
                 <artifactId>vaadin-maven-plugin</artifactId>
                 <version>${vaadin.version}</version>
                 <configuration>
-                    <pnpmEnable>true</pnpmEnable>
-                    <requireHomeNodeExec>true</requireHomeNodeExec>
+                    <!-- <pnpmEnable>true</pnpmEnable>
+                    <requireHomeNodeExec>true</requireHomeNodeExec> -->
                 </configuration>
             </plugin>
         </plugins>

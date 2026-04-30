@@ -47,6 +47,8 @@ public class InputMask extends AbstractSinglePropertyField<InputMask, String> im
 
     static final String TAG_NAME = "input-mask";
 
+	private static final String ALLOW_WHITESPACE_PROPERTY = "allowWhitespace";
+
 	private WeakReference<Component> extended;
 	private Registration attachRegistration = null;
     private Registration valueChangeRegistration;
@@ -128,7 +130,34 @@ public class InputMask extends AbstractSinglePropertyField<InputMask, String> im
 			consumer.accept(value);
 		});
     }
-	
+
+	/**
+	 * Allows whitespace characters to be entered into the field from the keyboard
+	 * or pasted from the clipboard.
+	 * <p>
+	 * When set to {@code false} (the default), the wrapper intercepts the space
+	 * bar in two situations: pressing space when the caret is at position 0 is
+	 * cancelled, and pressing space while the whole value is selected clears the
+	 * field. When set to {@code true}, the wrapper does not intercept space, and
+	 * IMask decides whether the character is accepted based on the configured
+	 * mask.
+	 *
+	 * @param allowWhitespace
+	 *            {@code true} to allow whitespace input, {@code false} to keep
+	 *            the default behaviour.
+	 */
+	public void setAllowWhitespace(boolean allowWhitespace) {
+		getElement().setProperty(ALLOW_WHITESPACE_PROPERTY, allowWhitespace);
+	}
+
+	/**
+	 * @return {@code true} if whitespace input is currently allowed.
+	 * @see #setAllowWhitespace(boolean)
+	 */
+	public boolean isAllowWhitespace() {
+		return getElement().getProperty(ALLOW_WHITESPACE_PROPERTY, false);
+	}
+
 	@Override
     public void setErrorMessage(String errorMessage) {
         if (extendedHasValidation()) {

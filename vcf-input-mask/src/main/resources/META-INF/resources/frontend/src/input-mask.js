@@ -28,9 +28,12 @@ class InputMask extends LitElement {
       },
       imask: {
         type: Object
+      },
+      allowWhitespace: {
+        type: Boolean
       }
     };
-  }  
+  }
         
   get unmaskedValue() {
 	return this.getUnmaskedValue();
@@ -82,6 +85,9 @@ class InputMask extends LitElement {
   }
   
   _handleKeyEvent(ev) {
+    if (this.allowWhitespace) {
+      return;
+    }
     const spaceBar = ev.key == " " || ev.code == "Space" || ev.keyCode == 32;
     const selectAll = ev.target.selectionEnd > ev.target.selectionStart && ev.target.selectionEnd == ev.target.value.length;
     if (spaceBar && selectAll) {
@@ -91,7 +97,7 @@ class InputMask extends LitElement {
     } else if (spaceBar && ev.target.selectionEnd == 0) {
       ev.preventDefault();
    	}
-  }  
+  }
  
   /** Update textfield value on input update */	
   _handleInputValueChange(e) {
