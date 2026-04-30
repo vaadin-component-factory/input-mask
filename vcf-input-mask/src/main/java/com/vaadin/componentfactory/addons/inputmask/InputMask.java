@@ -58,6 +58,25 @@ public class InputMask extends AbstractSinglePropertyField<InputMask, String> im
 		this(mask, false, options);
 	}
 
+	/**
+	 * Creates an {@code InputMask} with the given mask and IMask options.
+	 *
+	 * <p><strong>Security warning:</strong> when {@code evalMask} is
+	 * {@code true}, the {@code mask} string is passed to JavaScript
+	 * {@code eval()} on the client. Only pass developer-authored, trusted
+	 * mask strings — never values coming from end-user input or any other
+	 * untrusted source — or arbitrary JavaScript will run in the browser.
+	 *
+	 * @param mask
+	 *            the mask pattern.
+	 * @param evalMask
+	 *            {@code true} to evaluate the mask as a JavaScript expression
+	 *            (e.g. for regex masks like {@code "/^\\d+$/"} or built-ins
+	 *            like {@code "Number"}). This value MUST NOT come from
+	 *            untrusted input.
+	 * @param options
+	 *            additional IMask options.
+	 */
 	public InputMask(String mask, boolean evalMask, InputMaskOption... options) {
 	    super("unmaskedValue", "", false);
 		this.options = new ArrayList<>();
@@ -87,12 +106,20 @@ public class InputMask extends AbstractSinglePropertyField<InputMask, String> im
 	 * Replaces the active mask, optionally evaluating it as a JavaScript
 	 * expression. The auxiliary options passed to the constructor are kept.
 	 *
+	 * <p><strong>Security warning:</strong> when {@code evalMask} is
+	 * {@code true}, the {@code mask} string is passed to JavaScript
+	 * {@code eval()} on the client. Only pass developer-authored, trusted
+	 * mask strings — never values coming from end-user input or any other
+	 * untrusted source — or arbitrary JavaScript will run in the browser.
+	 *
 	 * @param mask
 	 *            the new mask pattern.
 	 * @param evalMask
 	 *            {@code true} to evaluate the mask string as a JavaScript
-	 *            expression on the client (e.g. for regex masks), {@code false}
-	 *            to send it as a plain string.
+	 *            expression on the client (e.g. for regex masks like
+	 *            {@code "/^\\d+$/"} or built-ins like {@code "Number"}),
+	 *            {@code false} to send it as a plain string. This value MUST
+	 *            NOT come from untrusted input.
 	 * @see #setMask(String)
 	 */
 	public void setMask(String mask, boolean evalMask) {
@@ -112,11 +139,17 @@ public class InputMask extends AbstractSinglePropertyField<InputMask, String> im
 	 * auxiliary options (e.g. {@code overwrite}, {@code lazy}) are discarded;
 	 * only the supplied ones are applied alongside the new mask.
 	 *
+	 * <p><strong>Security warning:</strong> when {@code evalMask} is
+	 * {@code true}, the {@code mask} string is passed to JavaScript
+	 * {@code eval()} on the client. Only pass developer-authored, trusted
+	 * mask strings — never values coming from end-user input or any other
+	 * untrusted source — or arbitrary JavaScript will run in the browser.
+	 *
 	 * @param mask
 	 *            the new mask pattern.
 	 * @param evalMask
 	 *            {@code true} to evaluate the mask as a JavaScript expression
-	 *            on the client.
+	 *            on the client. This value MUST NOT come from untrusted input.
 	 * @param options
 	 *            replacement auxiliary options.
 	 * @see #setMask(String)

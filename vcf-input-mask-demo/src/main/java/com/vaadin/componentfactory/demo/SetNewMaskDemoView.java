@@ -14,6 +14,7 @@
 package com.vaadin.componentfactory.demo;
 
 import com.vaadin.componentfactory.addons.inputmask.InputMask;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
@@ -24,10 +25,14 @@ import com.vaadin.flow.router.Route;
 /**
  * Demo view for the {@code setMask} feature on {@link InputMask}.
  * <p>
- * The view exposes a {@link Select} that switches the active mask of a single
- * {@link TextField} between three patterns. Each selection calls
+ * The first card exposes a {@link Select} that switches the active mask of a
+ * single {@link TextField} between three patterns. Each selection calls
  * {@link InputMask#setMask(String)} on the same wrapper instance, so the
  * field is updated in place without re-creating the wrapper.
+ * <p>
+ * The second card combines {@code setMask} with
+ * {@link InputMask#setAllowWhitespace(boolean)} to demonstrate that the
+ * whitespace toggle persists across mask changes.
  *
  * @author Vaadin Ltd
  */
@@ -39,9 +44,13 @@ public class SetNewMaskDemoView extends BaseDemoView {
   private static final String PHONE_INTL_MASK = "+00 000 000 0000";
   private static final String REFERENCE_MASK = "a-00000000-a";
 
+  private static final String REGEX_ANY_MASK = "/^.*$/";
+  private static final String WILDCARD_PATTERN_MASK = "*-00000000-a";
+
   public SetNewMaskDemoView() {
     addClassName("demo-view");
     createSetMaskOnTextFieldDemo();
+    createSetMaskWithWhitespaceToggleDemo();
   }
 
   private void createSetMaskOnTextFieldDemo() {
@@ -86,5 +95,55 @@ public class SetNewMaskDemoView extends BaseDemoView {
             + "mask can be tried with a fresh value.");
 
     add(createCard("Switch mask at runtime", description, maskSelect, field, message));
+  }
+
+  private void createSetMaskWithWhitespaceToggleDemo() {
+    Div message = createMessageDiv("set-new-mask-whitespace-demo-message");
+    Span maskedValueSpan = new Span();
+
+    TextField field = new TextField("Value");
+
+    // Start with the regex mask (must be eval'd on the client) so the
+    // whitespace toggle has a visible effect on the very first interaction.
+    InputMask mask = new InputMask(REGEX_ANY_MASK, true);
+    mask.extend(field);
+
+    Select<String> maskSelect = new Select<>();
+    maskSelect.setLabel("Mask");
+    maskSelect.setItems(REGEX_ANY_MASK, WILDCARD_PATTERN_MASK);
+    maskSelect.setValue(REGEX_ANY_MASK);
+    maskSelect.addValueChangeListener(ev -> {
+      String newMask = ev.getValue();
+      if (newMask == null) {
+        return;
+      }
+      // The regex variant must be evaluated on the client; the pattern
+      // variant is a plain string.
+      mask.setMask(newMask, REGEX_ANY_MASK.equals(newMask));
+      field.clear();
+    });
+
+    Checkbox whitespaceToggle = new Checkbox("Allow whitespace");
+    whitespaceToggle.addValueChangeListener(ev -> mask.setAllowWhitespace(ev.getValue()));
+
+    field.addValueChangeListener(ev -> {
+      mask.getMaskedValue(masked -> maskedValueSpan
+          .setText("Masked value: \"" + masked + "\""));
+      message.add(maskedValueSpan);
+    });
+
+    field.setId("set-new-mask-whitespace-text-field");
+    maskSelect.setId("set-new-mask-whitespace-select");
+    whitespaceToggle.setId("set-new-mask-whitespace-toggle");
+
+    Paragraph description = new Paragraph(
+        "Combines setMask with setAllowWhitespace. Toggle the checkbox to allow "
+            + "or block leading whitespace, then switch the mask via the "
+            + "dropdown. The whitespace setting persists across mask changes, "
+            + "so the two features can be used together without re-creating "
+            + "the wrapper.");
+
+    add(createCard("Switch mask + whitespace toggle", description, maskSelect,
+        whitespaceToggle, field, message));
   }
 }
