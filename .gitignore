@@ -43,4 +43,5 @@ vite.config.ts
 
 vcf-input-mask-demo/src/main/frontend/index.html
 vcf-input-mask-demo/src/main/frontend/generated
+vcf-input-mask-demo/src/main/bundles
 .vscode/launch.json

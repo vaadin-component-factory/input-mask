@@ -67,11 +67,86 @@ public class InputMask extends AbstractSinglePropertyField<InputMask, String> im
 		}
 	}
 
+	/**
+	 * Replaces the active mask while keeping every other option (such as
+	 * {@code overwrite} or {@code lazy}) and the current binding to the host
+	 * component. Safe to call before or after {@link #extend(Component)}; when
+	 * the wrapper has already been extended onto a component, the new mask is
+	 * pushed to the client and applied in place without recreating the
+	 * {@code <input-mask>} element.
+	 *
+	 * @param mask
+	 *            the new mask pattern, in the same format accepted by
+	 *            {@link #InputMask(String, InputMaskOption...)}.
+	 */
+	public void setMask(String mask) {
+		setMask(mask, false);
+	}
+
+	/**
+	 * Replaces the active mask, optionally evaluating it as a JavaScript
+	 * expression. The auxiliary options passed to the constructor are kept.
+	 *
+	 * @param mask
+	 *            the new mask pattern.
+	 * @param evalMask
+	 *            {@code true} to evaluate the mask string as a JavaScript
+	 *            expression on the client (e.g. for regex masks), {@code false}
+	 *            to send it as a plain string.
+	 * @see #setMask(String)
+	 */
+	public void setMask(String mask, boolean evalMask) {
+		for (int i = 0; i < this.options.size(); i++) {
+			if ("mask".equals(this.options.get(i).getKey())) {
+				this.options.set(i, option("mask", mask, evalMask));
+				pushOptionsToClient();
+				return;
+			}
+		}
+		this.options.add(0, option("mask", mask, evalMask));
+		pushOptionsToClient();
+	}
+
+	/**
+	 * Replaces the active mask and the auxiliary IMask options. The previous
+	 * auxiliary options (e.g. {@code overwrite}, {@code lazy}) are discarded;
+	 * only the supplied ones are applied alongside the new mask.
+	 *
+	 * @param mask
+	 *            the new mask pattern.
+	 * @param evalMask
+	 *            {@code true} to evaluate the mask as a JavaScript expression
+	 *            on the client.
+	 * @param options
+	 *            replacement auxiliary options.
+	 * @see #setMask(String)
+	 */
+	public void setMask(String mask, boolean evalMask, InputMaskOption... options) {
+		this.options = new ArrayList<>();
+		this.options.add(option("mask", mask, evalMask));
+		if (options != null) {
+			this.options.addAll(Arrays.asList(options));
+		}
+		pushOptionsToClient();
+	}
+
+	private void pushOptionsToClient() {
+		if (extended == null || extended.get() == null) {
+			return;
+		}
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			getElement().setProperty("options", objectMapper.writeValueAsString(options));
+		} catch (JacksonException ex) {
+			logger.error("Error serializing InputMask options", ex);
+		}
+	}
+
 	public void extend(Component component) {
 	    extended = new WeakReference<Component>(component);
 		if (component.getUI().isPresent()) {
 			extend(component, component.getUI().get());
-		} else {		    
+		} else {
 			attachRegistration = component.addAttachListener(event -> extend(component, event.getUI()));
 			component.addDetachListener(event -> remove());
 		}
@@ -82,7 +157,7 @@ public class InputMask extends AbstractSinglePropertyField<InputMask, String> im
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             getElement().setProperty("options", objectMapper.writeValueAsString(options));
-            
+
             Element componentElement = component.getElement();
             // remove any existing input-mask element attached to component
             componentElement.getChildren()
