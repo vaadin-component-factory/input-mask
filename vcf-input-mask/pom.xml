@@ -10,7 +10,7 @@
 
     <name>Input Mask Add-on</name>
 
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <inceptionYear>2023</inceptionYear>
     <organization>
         <name>Vaadin Ltd</name>
@@ -18,7 +18,7 @@
     </organization>
 
     <properties>
-        <vaadin.version>25.0.0</vaadin.version>
+        <vaadin.version>25.0.9</vaadin.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
     </properties>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-generic</artifactId>
-            <version>25.0.0</version>
+            <version>${vaadin.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -63,7 +63,7 @@
         <dependency>
 		    <groupId>jakarta.servlet</groupId>
 		    <artifactId>jakarta.servlet-api</artifactId>
-		    <version>6.0.0</version>
+		    <version>6.1.0</version>
 		    <scope>provided</scope>
 		</dependency>
     </dependencies>

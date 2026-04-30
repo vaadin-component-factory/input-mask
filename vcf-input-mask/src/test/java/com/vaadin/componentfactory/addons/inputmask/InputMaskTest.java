@@ -16,6 +16,8 @@
 package com.vaadin.componentfactory.addons.inputmask;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.textfield.TextField;
@@ -47,9 +49,48 @@ public class InputMaskTest {
 		inputmask.extend(textField);
 
 		assertEquals("", textField.getValue());
-		
+
 		textField.setValue("(555)");
 		assertEquals("(555)", textField.getValue());
+	}
+
+	@Test
+	public void inputMask_allowWhitespace_defaultsToFalse() {
+		InputMask inputMask = new InputMask("/^.*$/", true);
+
+		assertFalse("allowWhitespace should default to false to keep the existing behaviour",
+				inputMask.isAllowWhitespace());
+		assertFalse("allowWhitespace property should not be reflected to the element by default",
+				inputMask.getElement().getProperty("allowWhitespace", false));
+	}
+
+	@Test
+	public void inputMask_allowWhitespace_canBeToggled() {
+		InputMask inputMask = new InputMask("/^.*$/", true);
+
+		inputMask.setAllowWhitespace(true);
+		assertTrue(inputMask.isAllowWhitespace());
+		assertTrue("allowWhitespace property should be reflected to the element when enabled",
+				inputMask.getElement().getProperty("allowWhitespace", false));
+
+		inputMask.setAllowWhitespace(false);
+		assertFalse(inputMask.isAllowWhitespace());
+		assertFalse("allowWhitespace property should be reflected to the element when disabled",
+				inputMask.getElement().getProperty("allowWhitespace", true));
+	}
+
+	@Test
+	public void inputMask_allowWhitespace_persistsAfterExtend() {
+		TextField textField = new TextField("");
+		InputMask inputMask = new InputMask("/^.*$/", true);
+
+		inputMask.setAllowWhitespace(true);
+		inputMask.extend(textField);
+
+		assertTrue("allowWhitespace must remain enabled after extending a component",
+				inputMask.isAllowWhitespace());
+		assertTrue("allowWhitespace property should still be reflected to the element after extend",
+				inputMask.getElement().getProperty("allowWhitespace", false));
 	}
 
 }

@@ -22,9 +22,12 @@ public class MainLayout extends AppLayout {
         new RouterLink("Binder use", BinderDemoView.class);
     final RouterLink binderWithUnmaskedValueDemo =
         new RouterLink("Binding unmasked value", BinderWithUnmaskedValueDemoView.class);
+    final RouterLink allowWhitespaceDemo =
+        new RouterLink("Allow whitespace", AllowWhitespaceDemoView.class);
 
     final VerticalLayout menuLayout =
-        new VerticalLayout(basicUseDemo, binderWithMaskedValueDemo, binderWithUnmaskedValueDemo);
+        new VerticalLayout(basicUseDemo, binderWithMaskedValueDemo, binderWithUnmaskedValueDemo,
+            allowWhitespaceDemo);
 
     addToDrawer(menuLayout);
     addToNavbar(drawerToggle);
