@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Vaadin Ltd.
+ * Copyright 2023-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -23,8 +23,7 @@ class InputMask extends LitElement {
   static get properties() {
     return {
       options: {
-        type: Object,
-        observer: '_optionsChanged'
+        type: Object
       },
       imask: {
         type: Object
@@ -34,34 +33,38 @@ class InputMask extends LitElement {
       }
     };
   }
-        
+
   get unmaskedValue() {
 	return this.getUnmaskedValue();
-  }  
-    
+  }
+
   set unmaskedValue(value) {}
-  
+
   /** Initialize imask property */
   _initImask(){
 	this._parentElement = this.parentElement;
-	if (['VAADIN-TEXT-FIELD', 'VAADIN-TEXT-AREA'].includes(this.parentElement.tagName.toUpperCase())) {
-	  this.imask = new IMask(this.parentElement.inputElement, this._generateIMaskOptions(JSON.parse(this.options)));  
+	if (!this._parentElement) {
+	  return;
+	}
+	if (['VAADIN-TEXT-FIELD', 'VAADIN-TEXT-AREA'].includes(this._parentElement.tagName.toUpperCase())) {
+	  this.imask = new IMask(this._parentElement.inputElement, this._generateIMaskOptions(JSON.parse(this.options)));
 	  this._boundHandleUnmaskedValueChange = this._handleUnmaskedValueChange.bind(this);
 	  this._parentElement.addEventListener("change", this._boundHandleUnmaskedValueChange);
-	  
+
 	  this._boundHandleInputValueChange = this._handleInputValueChange.bind(this);
-	  this._parentElement.inputElement.addEventListener("change", this._boundHandleInputValueChange);
-  
+	  this._maskedInputElement = this._parentElement.inputElement;
+	  this._maskedInputElement.addEventListener("change", this._boundHandleInputValueChange);
+
 	} else {
-	  const el = this.parentElement.querySelector('input');
+	  const el = this._parentElement.querySelector('input');
 	  this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options)));
 	  this._boundHandleInputMaskUnmaskedValueChanged = this._handleInputMaskUnmaskedValueChanged.bind(this);
-	  this._parentElement.addEventListener("value-changed", this._boundHandleInputMaskUnmaskedValueChanged);  
-	} 
+	  this._parentElement.addEventListener("value-changed", this._boundHandleInputMaskUnmaskedValueChanged);
+	}
 	this._boundHandleKeyEvent = this._handleKeyEvent.bind(this);
-	this._parentElement.addEventListener("keydown", this._boundHandleKeyEvent);  
+	this._parentElement.addEventListener("keydown", this._boundHandleKeyEvent);
   }
-  
+
   connectedCallback() {
     super.connectedCallback();
     if (this.options && !this.imask) {
@@ -71,14 +74,36 @@ class InputMask extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this._cleanUp();    
+    this._cleanUp();
   }
-  
+
+  /**
+   * Re-initialise IMask whenever the `options` property is replaced after the
+   * wrapper has been mounted. The first set is handled by `connectedCallback`
+   * (oldValue is `undefined` in that case), so this only fires for subsequent
+   * `setMask` calls coming from the server.
+   */
+  updated(changedProperties) {
+    super.updated(changedProperties);
+    if (changedProperties.has('options') && changedProperties.get('options') !== undefined) {
+      this._cleanUp();
+      if (this.options && this.isConnected) {
+        this._initImask();
+      }
+    }
+  }
+
   _cleanUp() {
 	if (this.imask) {
-	  this._parentElement.removeEventListener("change", this._boundHandleUnmaskedValueChange);
-	  this._parentElement.removeEventListener("value-changed", this._boundHandleInputMaskUnmaskedValueChanged);  
-	  this._parentElement.removeEventListener("keydown", this._boundHandleKeyEvent);
+	  if (this._parentElement) {
+	    this._parentElement.removeEventListener("change", this._boundHandleUnmaskedValueChange);
+	    this._parentElement.removeEventListener("value-changed", this._boundHandleInputMaskUnmaskedValueChanged);
+	    this._parentElement.removeEventListener("keydown", this._boundHandleKeyEvent);
+	  }
+	  if (this._maskedInputElement) {
+	    this._maskedInputElement.removeEventListener("change", this._boundHandleInputValueChange);
+	    this._maskedInputElement = undefined;
+	  }
 	  this.imask.destroy();
 	  this.imask = undefined;
 	}
@@ -122,16 +147,6 @@ class InputMask extends LitElement {
 	this.dispatchEvent(event);	
   }
 
-  _optionsChanged(newOptions, oldOptions) {
-    if (!newOptions) {
-      return;
-    }
-
-    this.options = newOptions;
-    this._cleanUp();
-	this._initImask();
-  }
-  
   _generateIMaskOptions(maskOptions) {
     const result = {};
     maskOptions.forEach(opt => {

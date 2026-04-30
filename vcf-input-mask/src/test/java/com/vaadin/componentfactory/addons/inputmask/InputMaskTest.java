@@ -93,4 +93,75 @@ public class InputMaskTest {
 				"allowWhitespace property should still be reflected to the element after extend");
 	}
 
+	@Test
+	public void setMask_beforeExtend_appliesNewMaskOnExtend() {
+		TextField textField = new TextField("");
+		ui.add(textField);
+
+		InputMask inputMask = new InputMask("(000)");
+		inputMask.setMask("(00) 0000");
+		inputMask.extend(textField);
+
+		String options = inputMask.getElement().getProperty("options");
+		assertTrue(options.contains("(00) 0000"),
+				"options pushed to the client should reflect the most recent setMask call");
+		assertFalse(options.contains("\"value\":\"(000)\""),
+				"options pushed to the client should not still contain the original mask");
+	}
+
+	@Test
+	public void setMask_afterExtend_updatesOptionsProperty() {
+		TextField textField = new TextField("");
+		ui.add(textField);
+
+		InputMask inputMask = new InputMask("(000)");
+		inputMask.extend(textField);
+
+		String optionsBefore = inputMask.getElement().getProperty("options");
+		assertTrue(optionsBefore.contains("(000)"),
+				"original mask must be present in the options before setMask is called");
+
+		inputMask.setMask("(00) 0000");
+
+		String optionsAfter = inputMask.getElement().getProperty("options");
+		assertTrue(optionsAfter.contains("(00) 0000"),
+				"setMask must update the options pushed to the client");
+		assertFalse(optionsAfter.contains("\"value\":\"(000)\""),
+				"setMask must replace the previous mask entry, not append a second one");
+	}
+
+	@Test
+	public void setMask_withOptions_replacesAuxiliaryOptions() {
+		TextField textField = new TextField("");
+		ui.add(textField);
+
+		InputMask inputMask = new InputMask("(000)", false,
+				InputMaskOption.option("overwrite", true));
+		inputMask.extend(textField);
+
+		inputMask.setMask("(00) 0000", false, InputMaskOption.option("lazy", false));
+
+		String options = inputMask.getElement().getProperty("options");
+		assertTrue(options.contains("(00) 0000"), "new mask must be present");
+		assertTrue(options.contains("\"key\":\"lazy\""),
+				"new auxiliary option must be present after setMask overload");
+		assertFalse(options.contains("\"key\":\"overwrite\""),
+				"setMask overload must replace the previous auxiliary options");
+	}
+
+	@Test
+	public void setMask_afterExtend_doesNotChangeUnmaskedFieldValue() {
+		TextField textField = new TextField("");
+		ui.add(textField);
+
+		InputMask inputMask = new InputMask("(000)");
+		inputMask.extend(textField);
+		textField.setValue("hello");
+
+		inputMask.setMask("(00) 0000");
+
+		assertEquals("hello", textField.getValue(),
+				"setMask must not clear the field value - the host application owns it");
+	}
+
 }

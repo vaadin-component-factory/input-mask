@@ -101,6 +101,28 @@ binder.forField(phoneFieldMask)
 binder.setBean(new Person());
 ```
 
+### Changing the mask at runtime
+
+Call `setMask(String)` on the same `InputMask` instance to swap the active
+mask without re-creating the wrapper. This works both before and after
+`extend(...)` and is intended for cases like a country selector that switches
+the phone number format, or a "type" selector that toggles between SSN / EIN
+masks.
+
+```java
+TextField field = new TextField("Value");
+InputMask mask = new InputMask("(000) 000-0000");
+mask.extend(field);
+
+// Later, in response to a UI event:
+mask.setMask("+00 000 000 0000");
+```
+
+The auxiliary options (e.g. `overwrite`, `lazy`) configured at construction
+time are kept. Use the
+`setMask(String mask, boolean evalMask, InputMaskOption... options)` overload
+when you also need to replace those.
+
 ### Allowing whitespace input
 
 By default, the wrapper intercepts the space bar in two situations: pressing space when the caret is at position 0 is cancelled, and pressing space while the whole value is selected clears the field. This makes the component unsuitable for masks where a space is a legitimate part of the value (for example a name, a sentence, or a pattern with the IMask `*` wildcard).
