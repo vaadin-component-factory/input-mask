@@ -18,7 +18,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
@@ -79,10 +78,18 @@ public class MaskedValueSyncDemoView extends BaseDemoView {
     grid.addSelectionListener(ev -> ev.getFirstSelectedItem()
         .ifPresent(p -> phoneField.setValue(p.getPhone())));
 
-    add(createCard("Masked value stays in sync with getValue()",
-        new Paragraph("Type digits (including one past a full number) and watch the "
-            + "committed value below - it stays masked. Selecting a grid row pushes a "
-            + "value into the field from the server."),
-        new VerticalLayout(phoneField, committed, eagerField, eagerCommitted, grid)));
+    Paragraph typingInfo = new Paragraph("Type digits into either field, including one past "
+        + "a full number - the committed value below each field stays masked (e.g. typing "
+        + "\"12345678901\" commits \"(123) 456-7890\", not \"12345678901\").");
+
+    Paragraph gridInfo = new Paragraph("Selecting a row below calls setValue(...) on the "
+        + "TIMEOUT field from the server with the raw phone number. The field displays it "
+        + "masked; getValue() returns exactly what was set (the raw value), and the "
+        + "programmatic update is never reverted by the user-input sync.");
+
+    add(createCard("Live typing keeps getValue() masked",
+        typingInfo, phoneField, committed, eagerField, eagerCommitted));
+    add(createCard("Server-side setValue() from a Grid fills the TIMEOUT field",
+        gridInfo, grid));
   }
 }
