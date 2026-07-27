@@ -213,11 +213,29 @@ class InputMask extends LitElement {
   }
 
   getUnmaskedValue() {
+    this._syncImaskFromInput();
     return this.imask ? this.imask.unmaskedValue : "";
   }
 
   getMaskedValue() {
+    this._syncImaskFromInput();
     return this.imask ? this.imask.value : "";
+  }
+
+  /**
+   * Ensure IMask reflects the host input's current value before a read. When the
+   * host value is changed programmatically (e.g. a server-side setValue after a
+   * grid selection), the listener that pushes the value into IMask may run after
+   * an application getMaskedValue()/getUnmaskedValue() call, so the read would
+   * otherwise return a stale, lag-by-one value. Re-syncing from the input here
+   * makes reads consistent regardless of listener ordering. Only applies to the
+   * text field / text area binding, where `_maskedInputElement` is the input.
+   */
+  _syncImaskFromInput() {
+    const input = this._maskedInputElement;
+    if (this.imask && input && this.imask.value !== input.value) {
+      this.imask.value = input.value;
+    }
   }
  
   setValue(value){
