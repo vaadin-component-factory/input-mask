@@ -24,11 +24,6 @@ import java.util.List;
 @Route(value = "binder-masked", layout = MainLayout.class)
 public class BinderDemoView extends BaseDemoView {
 
-  // The Binder-bound phone field from the first card. The grid at the bottom
-  // populates it on row selection to demonstrate a programmatic setValue on a
-  // masked, Binder-bound field.
-  private TextField boundPhoneField;
-
   public BinderDemoView() {
     addClassName("demo-view");
     createInputMaskOnTextFieldWithBinderDemo();
@@ -41,11 +36,9 @@ public class BinderDemoView extends BaseDemoView {
 
     // create text field
     TextField phoneField = new TextField("Phone");
-    this.boundPhoneField = phoneField;
     phoneField.setPlaceholder(PHONE_MASK);
     phoneField.setHelperText(
-        "Binder validation will be triggered if entered phone number has length < 14. "
-            + "Selecting a row in the grid below fills this field.");
+        "Binder validation will be triggered if entered phone number has length < 14.");
 
     // create input mask for text field
     InputMask phoneFieldMask = new InputMask(PHONE_MASK);
@@ -150,16 +143,6 @@ public class BinderDemoView extends BaseDemoView {
         ((Focusable) editorComponent).focus();
       }
     });
-
-    // Selecting a row fills the Binder-bound phone field in the first card via a
-    // server-side setValue. The masked field displays the value correctly and
-    // the programmatic update is not reverted by the user-input sync.
-    grid.addSelectionListener(e -> e.getFirstSelectedItem()
-        .ifPresent(p -> {
-          if (boundPhoneField != null) {
-            boundPhoneField.setValue(p.getPhone());
-          }
-        }));
 
     editor.addCancelListener(e -> {
       phoneValidationMessage.setText("");
