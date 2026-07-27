@@ -55,6 +55,13 @@ class InputMask extends LitElement {
 	  this._maskedInputElement = this._parentElement.inputElement;
 	  this._maskedInputElement.addEventListener("change", this._boundHandleInputValueChange);
 
+	  // Registered after `new IMask(...)`, so it runs after IMask has reformatted
+	  // the value on the same `input` event. Fixes live value-change modes
+	  // (EAGER / TIMEOUT) where the host field otherwise captures the raw,
+	  // pre-mask text and delivers characters the mask rejected to the server.
+	  this._boundHandleMaskedInput = this._handleMaskedInput.bind(this);
+	  this._maskedInputElement.addEventListener("input", this._boundHandleMaskedInput);
+
 	} else {
 	  const el = this._parentElement.querySelector('input');
 	  this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options)));
@@ -102,6 +109,7 @@ class InputMask extends LitElement {
 	  }
 	  if (this._maskedInputElement) {
 	    this._maskedInputElement.removeEventListener("change", this._boundHandleInputValueChange);
+	    this._maskedInputElement.removeEventListener("input", this._boundHandleMaskedInput);
 	    this._maskedInputElement = undefined;
 	  }
 	  this.imask.destroy();
@@ -124,10 +132,39 @@ class InputMask extends LitElement {
    	}
   }
  
-  /** Update textfield value on input update */	
+  /** Update textfield value on input update */
   _handleInputValueChange(e) {
 	 this._parentElement.value = this.imask.value;
 	 this._parentElement._onChange(e);
+  }
+
+  /**
+   * Keep the host field's value in sync with the masked value during live
+   * typing (value-change modes EAGER / TIMEOUT). The host field runs its own
+   * `input` listener before IMask reformats, so it captures the raw, pre-mask
+   * text; without this the server can receive a value that still contains
+   * characters the mask rejected (e.g. an extra digit typed into an
+   * already-full field).
+   *
+   * The correction is deferred to a microtask so it runs after the host field's
+   * synchronous input handling has settled, and only for genuine user input:
+   * the server-driven `setValue()` path updates IMask directly and its
+   * programmatic (untrusted) input events must not be echoed back, or a value
+   * pushed into the field from the server (e.g. a grid selection) could be
+   * reverted to the previous value.
+   */
+  _handleMaskedInput(e) {
+	if (!e.isTrusted) {
+	  return;
+	}
+	queueMicrotask(() => {
+	  if (this.imask
+		  && this._maskedInputElement
+		  && document.activeElement === this._maskedInputElement
+		  && this._parentElement.value !== this.imask.value) {
+		this._parentElement.value = this.imask.value;
+	  }
+	});
   }
  
   /** Update imask value on field "value-changed" event */ 	   
