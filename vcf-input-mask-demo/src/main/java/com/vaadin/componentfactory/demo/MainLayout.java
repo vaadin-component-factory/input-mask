@@ -28,10 +28,12 @@ public class MainLayout extends AppLayout {
         new RouterLink("Set new mask", SetNewMaskDemoView.class);
     final RouterLink maskedValueSyncDemo =
         new RouterLink("Masked value sync", MaskedValueSyncDemoView.class);
+    final RouterLink setMaskWithValueDemo =
+        new RouterLink("Set mask + value", SetMaskWithValueDemoView.class);
 
     final VerticalLayout menuLayout =
         new VerticalLayout(basicUseDemo, binderWithMaskedValueDemo, binderWithUnmaskedValueDemo,
-            allowWhitespaceDemo, setNewMaskDemo, maskedValueSyncDemo);
+            allowWhitespaceDemo, setNewMaskDemo, maskedValueSyncDemo, setMaskWithValueDemo);
 
     addToDrawer(menuLayout);
     addToNavbar(drawerToggle);
