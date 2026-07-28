@@ -37,6 +37,8 @@ public class MaskedValueSyncPlaywrightIT extends AbstractPlaywrightTest {
   private static final String FIELD_INPUT = "vaadin-text-field#masked-value-sync-field input";
   private static final String FIELD_MASK = "vaadin-text-field#masked-value-sync-field input-mask";
   private static final String COMMITTED = "#masked-value-sync-committed";
+  private static final String UNMASKED = "#masked-value-sync-unmasked";
+  private static final String GRID = "vaadin-grid#masked-value-sync-grid";
 
   private static final String EAGER_INPUT =
       "vaadin-text-field#masked-value-sync-eager-field input";
@@ -77,15 +79,33 @@ public class MaskedValueSyncPlaywrightIT extends AbstractPlaywrightTest {
     openDemo();
 
     // Selecting a row pushes the raw phone number into the field from the server.
-    page.locator("vaadin-grid#masked-value-sync-grid")
-        .getByText("Bob", new Locator.GetByTextOptions().setExact(true))
-        .click();
+    selectRow("Bob");
 
     Locator input = page.locator(FIELD_INPUT);
     // The programmatic value is displayed masked and is not reverted to a previous
     // value by the user-input sync.
     assertThat(input).hasValue("(555) 987-6543");
     assertThat(page.locator(COMMITTED)).hasText("getValue()=\"5559876543\"");
+  }
+
+  @Test
+  public void gridSelectionUnmaskedValueIsNotStale() {
+    openDemo();
+
+    // Select two rows in turn. getUnmaskedValue() runs from the field's
+    // value-change listener; after a programmatic setValue it must reflect the
+    // row just selected, not lag one selection behind.
+    selectRow("Alice");
+    assertThat(page.locator(UNMASKED)).hasText("getUnmaskedValue()=\"1234567890\"");
+
+    selectRow("Bob");
+    assertThat(page.locator(FIELD_INPUT)).hasValue("(555) 987-6543");
+    assertThat(page.locator(UNMASKED)).hasText("getUnmaskedValue()=\"5559876543\"");
+  }
+
+  private void selectRow(String name) {
+    page.locator(GRID).getByText(name,
+        new Locator.GetByTextOptions().setExact(true)).click();
   }
 
   private void openDemo() {
