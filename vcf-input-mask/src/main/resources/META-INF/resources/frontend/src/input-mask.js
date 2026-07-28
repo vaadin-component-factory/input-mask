@@ -93,11 +93,34 @@ class InputMask extends LitElement {
   updated(changedProperties) {
     super.updated(changedProperties);
     if (changedProperties.has('options') && changedProperties.get('options') !== undefined) {
+      // Preserve the host field's intended value across the mask change. If the
+      // value was set while a previous (shorter) mask was still active, the DOM
+      // may have been truncated (e.g. "2005" shown as "20" under a "00" mask).
+      // Re-seeding the new IMask from the field's value property - rather than
+      // letting it initialise from the truncated DOM - makes the new mask format
+      // the intended value.
+      const preservedValue = this._getHostFieldValue();
       this._cleanUp();
       if (this.options && this.isConnected) {
         this._initImask();
+        if (this.imask && preservedValue) {
+          this.imask.value = preservedValue;
+        }
       }
     }
+  }
+
+  /**
+   * @return the host field's current value for a text field / text area (whose
+   *         `value` property holds the intended masked value), or {@code null}
+   *         for other host components.
+   */
+  _getHostFieldValue() {
+    const p = this._parentElement;
+    if (p && ['VAADIN-TEXT-FIELD', 'VAADIN-TEXT-AREA'].includes(p.tagName.toUpperCase())) {
+      return p.value;
+    }
+    return null;
   }
 
   _cleanUp() {
