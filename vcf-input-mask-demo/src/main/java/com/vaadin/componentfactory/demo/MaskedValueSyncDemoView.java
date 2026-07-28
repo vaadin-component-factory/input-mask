@@ -52,8 +52,11 @@ public class MaskedValueSyncDemoView extends BaseDemoView {
     mask.extend(phoneField);
 
     Div committed = createMessageDiv("masked-value-sync-committed");
-    phoneField.addValueChangeListener(ev ->
-        committed.setText("getValue()=\"" + ev.getValue() + "\""));
+    Div unmasked = createMessageDiv("masked-value-sync-unmasked");
+    phoneField.addValueChangeListener(ev -> {
+      committed.setText("getValue()=\"" + ev.getValue() + "\"");
+      mask.getUnmaskedValue(u -> unmasked.setText("getUnmaskedValue()=\"" + u + "\""));
+    });
     phoneField.setId("masked-value-sync-field");
 
     TextField eagerField = new TextField("Phone (EAGER mode)");
@@ -84,11 +87,12 @@ public class MaskedValueSyncDemoView extends BaseDemoView {
 
     Paragraph gridInfo = new Paragraph("Selecting a row below calls setValue(...) on the "
         + "TIMEOUT field from the server with the raw phone number. The field displays it "
-        + "masked; getValue() returns exactly what was set (the raw value), and the "
-        + "programmatic update is never reverted by the user-input sync.");
+        + "masked; getValue() returns exactly what was set (the raw value), "
+        + "getUnmaskedValue() reflects the just-selected row (not a stale previous value), "
+        + "and the programmatic update is never reverted by the user-input sync.");
 
     add(createCard("Live typing keeps getValue() masked",
-        typingInfo, phoneField, committed, eagerField, eagerCommitted));
+        typingInfo, phoneField, committed, unmasked, eagerField, eagerCommitted));
     add(createCard("Server-side setValue() from a Grid fills the TIMEOUT field",
         gridInfo, grid));
   }
