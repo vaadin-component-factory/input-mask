@@ -30,10 +30,13 @@ public class MainLayout extends AppLayout {
         new RouterLink("Masked value sync", MaskedValueSyncDemoView.class);
     final RouterLink setMaskWithValueDemo =
         new RouterLink("Set mask + value", SetMaskWithValueDemoView.class);
+    final RouterLink embeddedConstantMaskDemo =
+        new RouterLink("Embedded constant mask", EmbeddedConstantMaskDemoView.class);
 
     final VerticalLayout menuLayout =
         new VerticalLayout(basicUseDemo, binderWithMaskedValueDemo, binderWithUnmaskedValueDemo,
-            allowWhitespaceDemo, setNewMaskDemo, maskedValueSyncDemo, setMaskWithValueDemo);
+            allowWhitespaceDemo, setNewMaskDemo, maskedValueSyncDemo, setMaskWithValueDemo,
+            embeddedConstantMaskDemo);
 
     addToDrawer(menuLayout);
     addToNavbar(drawerToggle);
