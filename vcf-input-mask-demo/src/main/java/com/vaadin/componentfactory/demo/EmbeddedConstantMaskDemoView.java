@@ -62,9 +62,9 @@ public class EmbeddedConstantMaskDemoView extends BaseDemoView {
     legacyField.setWidth("400px");
     // lazy=false keeps the whole mask template visible, and the space
     // placeholder makes the empty slots render as blanks like the legacy
-    // application did: " 0800- - -      - ". eager=true moves the caret past
-    // the fixed characters as soon as a slot is filled, so after typing the
-    // first digit the caret lands right after the constant "0800-".
+    // application did: " 08000-  -  -      - ". eager=true moves the caret
+    // past the fixed characters as soon as a slot is filled, so after typing
+    // the first digit the caret lands right after the constant "08000-".
     InputMask inputMask = new InputMask(EMBEDDED_CONSTANT_MASK, lazy(false),
         option("placeholderChar", " "), option("eager", true));
     inputMask.extend(legacyField);
@@ -81,7 +81,7 @@ public class EmbeddedConstantMaskDemoView extends BaseDemoView {
 
     legacyField.setId("embedded-constant-mask-text-field");
 
-    add(createCard("Editable slot before constant block 0800 (template always visible)",
+    add(createCard("Editable slot before constant block 08000 (template always visible)",
         legacyField, message));
   }
 
@@ -106,7 +106,7 @@ public class EmbeddedConstantMaskDemoView extends BaseDemoView {
 
     lazyField.setId("embedded-constant-mask-lazy-text-field");
 
-    add(createCard("Editable slot before constant block 0800 (default lazy mask)",
+    add(createCard("Editable slot before constant block 08000 (default lazy mask)",
         lazyField, message));
   }
 }
