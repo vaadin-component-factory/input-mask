@@ -62,6 +62,9 @@ class InputMask extends LitElement {
 	  this._boundHandleMaskedInput = this._handleMaskedInput.bind(this);
 	  this._maskedInputElement.addEventListener("input", this._boundHandleMaskedInput);
 
+	  this._boundHandlePaste = this._handlePaste.bind(this);
+	  this._maskedInputElement.addEventListener("paste", this._boundHandlePaste);
+
 	} else {
 	  const el = this._parentElement.querySelector('input');
 	  this.imask = new IMask(el, this._generateIMaskOptions(JSON.parse(this.options)));
@@ -133,6 +136,7 @@ class InputMask extends LitElement {
 	  if (this._maskedInputElement) {
 	    this._maskedInputElement.removeEventListener("change", this._boundHandleInputValueChange);
 	    this._maskedInputElement.removeEventListener("input", this._boundHandleMaskedInput);
+	    this._maskedInputElement.removeEventListener("paste", this._boundHandlePaste);
 	    this._maskedInputElement = undefined;
 	  }
 	  this.imask.destroy();
@@ -189,9 +193,48 @@ class InputMask extends LitElement {
 	  }
 	});
   }
- 
-  /** Update imask value on field "value-changed" event */ 	   
-  _handleInputMaskUnmaskedValueChanged(ev) {    
+
+  /**
+   * With eager appending (`eager: true` / `'append'`), IMask processes paste
+   * as raw input and does not let fixed mask characters consume the matching
+   * characters of the pasted text, so pasting a fully formatted value shifts
+   * its fixed characters into the editable slots. The programmatic path
+   * (`imask.value = ...`) resolves without the raw flag and handles fixed
+   * characters correctly, so full-field pastes are routed through it. Partial
+   * pastes into an already-filled field and non-eager masks keep the default
+   * IMask behaviour.
+   */
+  _handlePaste(ev) {
+	if (!this.imask || !this._maskedInputElement) {
+	  return;
+	}
+	const masked = this.imask.masked;
+	const appendEager = masked.eager === true || masked.eager === 'append';
+	if (!appendEager) {
+	  return;
+	}
+	const input = this._maskedInputElement;
+	const replacesAll = (input.selectionStart === 0 && input.selectionEnd === input.value.length)
+	    || masked.rawInputValue === '';
+	if (!replacesAll) {
+	  return;
+	}
+	const text = ev.clipboardData ? ev.clipboardData.getData('text') : '';
+	if (!text) {
+	  return;
+	}
+	ev.preventDefault();
+	this.imask.value = text;
+	const caret = masked.nearestInputPos(masked.displayValue.length, 'LEFT');
+	input.setSelectionRange(caret, caret);
+	// Reuse the regular change flow (imask commit + host field sync). The
+	// prevented paste never marks the input dirty, so without this the host
+	// field would not pick up the pasted value on blur.
+	input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  /** Update imask value on field "value-changed" event */
+  _handleInputMaskUnmaskedValueChanged(ev) {
 	this.imask.value = ev.target.inputElement.value
 	this.imask.updateValue();	
   }
