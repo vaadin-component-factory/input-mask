@@ -254,7 +254,10 @@ class InputMask extends LitElement {
     const result = {};
     maskOptions.forEach(opt => {
         if (opt.eval) {
-          eval(`result.${opt.key} = ${opt.value}`);
+          // `new Function` instead of a direct `eval`, which bundlers flag because it
+          // disables scope minification. `IMask` is passed in explicitly: the body is
+          // compiled in global scope and would not see the module-level import.
+          result[opt.key] = new Function('IMask', `"use strict"; return (${opt.value});`)(IMask);
         } else if (opt.key === 'blocks') {
           const blocks = {};
           opt.value.forEach(block => blocks[block.key] = this._parseBlock(block.value));
@@ -270,7 +273,7 @@ class InputMask extends LitElement {
     const result = {};
     block.forEach(item => {
         if (item.eval) {
-          eval(`result.${item.key} = ${item.value}`);
+          result[item.key] = new Function('IMask', `"use strict"; return (${item.value});`)(IMask);
         } else {
           result[item.key] = item.value;
         }
