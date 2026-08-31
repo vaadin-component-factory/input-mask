@@ -225,11 +225,17 @@ class InputMask extends LitElement {
 	}
 	ev.preventDefault();
 	this.imask.value = text;
-	const caret = masked.nearestInputPos(masked.displayValue.length, 'LEFT');
-	input.setSelectionRange(caret, caret);
-	// Reuse the regular change flow (imask commit + host field sync). The
-	// prevented paste never marks the input dirty, so without this the host
-	// field would not pick up the pasted value on blur.
+	// Position the caret through IMask so its saved selection matches: its
+	// own `input` listener then treats the synthetic event below as a no-op
+	// instead of re-processing the pasted value as raw input.
+	this.imask.cursorPos = masked.nearestInputPos(masked.displayValue.length, 'LEFT');
+	// The prevented paste produces no native events, so replay the regular
+	// event sequence: `input` drives the input-based value change modes
+	// (EAGER / LAZY / TIMEOUT), `change` the commit flow (imask commit + host
+	// field sync). Without the latter the host field would not pick up the
+	// pasted value on blur, as the input was never marked dirty.
+	input.dispatchEvent(new InputEvent('input',
+	    { bubbles: true, composed: true, inputType: 'insertFromPaste', data: text }));
 	input.dispatchEvent(new Event('change', { bubbles: true }));
   }
 

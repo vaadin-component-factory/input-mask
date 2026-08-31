@@ -19,6 +19,7 @@ import com.vaadin.componentfactory.addons.inputmask.InputMask;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -51,6 +52,39 @@ public class EmbeddedConstantMaskDemoView extends BaseDemoView {
     addClassName("demo-view");
     createLegacyStyleMaskDemo();
     createLazyMaskDemo();
+    createEagerValueChangeModeDemo();
+  }
+
+  /**
+   * Same eager mask as the first card, but with {@link ValueChangeMode#EAGER}
+   * and both a value change and a blur listener, mirroring applications whose
+   * business logic requires the value change event to arrive before the blur
+   * event. The message logs the server-side event sequence, which makes it
+   * visible when an edit (e.g. a paste) does not produce a value change.
+   */
+  private void createEagerValueChangeModeDemo() {
+    Div message = createMessageDiv("embedded-constant-mask-eager-vcm-demo-message");
+    StringBuilder eventLog = new StringBuilder();
+
+    TextField eagerField = new TextField("Legacy code (EAGER value change mode)");
+    eagerField.setWidth("400px");
+    eagerField.setValueChangeMode(ValueChangeMode.EAGER);
+    InputMask inputMask = new InputMask(EMBEDDED_CONSTANT_MASK, lazy(false),
+        option("placeholderChar", " "), option("eager", true));
+    inputMask.extend(eagerField);
+
+    eagerField.addValueChangeListener(ev -> {
+      eventLog.append("[value-change: ").append(ev.getValue()).append(']');
+      message.setText(eventLog.toString());
+    });
+    eagerField.addBlurListener(ev -> {
+      eventLog.append("[blur]");
+      message.setText(eventLog.toString());
+    });
+
+    eagerField.setId("embedded-constant-mask-eager-vcm-text-field");
+
+    add(createCard("Eager mask with EAGER value change mode", eagerField, message));
   }
 
   private void createLegacyStyleMaskDemo() {
