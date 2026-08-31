@@ -58,6 +58,13 @@ public class EmbeddedConstantMaskPlaywrightIT extends AbstractPlaywrightTest {
   private static final String LAZY_MESSAGE_SELECTOR =
       "#embedded-constant-mask-lazy-demo-message";
 
+  private static final String EAGER_VCM_FIELD_INPUT_SELECTOR =
+      "vaadin-text-field#embedded-constant-mask-eager-vcm-text-field input";
+  private static final String EAGER_VCM_INPUT_MASK_SELECTOR =
+      "vaadin-text-field#embedded-constant-mask-eager-vcm-text-field input-mask";
+  private static final String EAGER_VCM_MESSAGE_SELECTOR =
+      "#embedded-constant-mask-eager-vcm-demo-message";
+
   // Mask template rendered by lazy=false + placeholderChar " ":
   // one blank slot, constant "08000-", then hyphen-separated slot groups.
   private static final String EMPTY_TEMPLATE = " 08000-  -  -      - ";
@@ -168,6 +175,30 @@ public class EmbeddedConstantMaskPlaywrightIT extends AbstractPlaywrightTest {
   }
 
   @Test
+  public void pastingIntoEagerValueChangeModeFieldFiresValueChangeBeforeBlur() {
+    openDemo();
+
+    Locator input = page.locator(EAGER_VCM_FIELD_INPUT_SELECTOR);
+    input.click();
+    paste(FORMATTED_VALUE);
+    assertThat(input).hasValue(FORMATTED_VALUE);
+
+    // ValueChangeMode.EAGER synchronizes on the input event, so the value
+    // change event must reach the server without any blur. The wrapper
+    // replays the input event after applying the pasted value; without that,
+    // the prevented paste produces no input event and the server never
+    // receives a value change (the regression behind this test).
+    Locator message = page.locator(EAGER_VCM_MESSAGE_SELECTOR);
+    assertThat(message).hasText("[value-change: " + FORMATTED_VALUE + "]");
+
+    // Blurring afterwards must append the blur event after the value change,
+    // the ordering that applications combining value change and blur
+    // listeners rely on.
+    input.press("Tab");
+    assertThat(message).hasText("[value-change: " + FORMATTED_VALUE + "][blur]");
+  }
+
+  @Test
   public void pastingFormattedValueIntoNonEagerFieldUsesDefaultHandling() {
     openDemo();
 
@@ -186,6 +217,8 @@ public class EmbeddedConstantMaskPlaywrightIT extends AbstractPlaywrightTest {
     page.locator(LEGACY_INPUT_MASK_SELECTOR).waitFor(
         new Locator.WaitForOptions().setState(WaitForSelectorState.ATTACHED));
     page.locator(LAZY_INPUT_MASK_SELECTOR).waitFor(
+        new Locator.WaitForOptions().setState(WaitForSelectorState.ATTACHED));
+    page.locator(EAGER_VCM_INPUT_MASK_SELECTOR).waitFor(
         new Locator.WaitForOptions().setState(WaitForSelectorState.ATTACHED));
   }
 
