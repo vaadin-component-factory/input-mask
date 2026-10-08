@@ -47,7 +47,26 @@ class InputMask extends LitElement {
 	  return;
 	}
 	if (['VAADIN-TEXT-FIELD', 'VAADIN-TEXT-AREA'].includes(this._parentElement.tagName.toUpperCase())) {
-	  this.imask = new IMask(this._parentElement.inputElement, this._generateIMaskOptions(JSON.parse(this.options)));
+	  const input = this._parentElement.inputElement;
+	  // A non-lazy mask writes its template (e.g. "  -    -   ") into the input
+	  // without updating the host field's value. When IMask is re-created
+	  // (setMask, or remove() followed by extend()) the input still shows the
+	  // previous instance's template, which the new instance would read back as
+	  // typed input. With definitions that accept the placeholder character
+	  // (e.g. a space), the blanks become real characters, the mask is complete
+	  // and every keystroke is rejected. An empty host value means nothing has
+	  // been entered, so start from an empty input.
+	  if (!this._parentElement.value && input.value) {
+	    input.value = '';
+	  }
+	  this.imask = new IMask(input, this._generateIMaskOptions(JSON.parse(this.options)));
+	  // IMask aligns the caret to an editable slot only on focus and click. On an
+	  // input that is already focused, no focus event follows, and the caret
+	  // stays where writing the template left it: after the template, where no
+	  // slot accepts input.
+	  if (document.activeElement === input) {
+	    this.imask.alignCursor();
+	  }
 	  this._boundHandleUnmaskedValueChange = this._handleUnmaskedValueChange.bind(this);
 	  this._parentElement.addEventListener("change", this._boundHandleUnmaskedValueChange);
 
