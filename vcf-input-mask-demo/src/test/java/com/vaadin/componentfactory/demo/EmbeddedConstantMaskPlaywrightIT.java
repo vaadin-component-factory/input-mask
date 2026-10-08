@@ -165,6 +165,9 @@ public class EmbeddedConstantMaskPlaywrightIT extends AbstractPlaywrightTest {
     input.click();
     input.pressSequentially("12345");
     assertThat(input).hasValue(TEMPLATE_AFTER_TYPING_12345);
+    // IMask re-applies the caret position 10 ms after each keystroke, which
+    // would collapse a selection made before that.
+    waitForPendingCaretUpdate(LEGACY_INPUT_MASK_SELECTOR);
 
     // Select-all before pasting over the existing value. Locator.selectText()
     // is used instead of pressing ControlOrMeta+a: on macOS the synthesized
@@ -232,6 +235,19 @@ public class EmbeddedConstantMaskPlaywrightIT extends AbstractPlaywrightTest {
     context.grantPermissions(List.of("clipboard-read", "clipboard-write"));
     page.evaluate("text => navigator.clipboard.writeText(text)", text);
     page.keyboard().press("ControlOrMeta+v");
+  }
+
+  /**
+   * Waits until IMask has applied the caret position it re-applies on a timer
+   * after each input (for mobile browsers), so that a selection made by the
+   * test is not collapsed by it.
+   */
+  private void waitForPendingCaretUpdate(String inputMaskSelector) {
+    page.waitForFunction(
+        "selector => { const m = document.querySelector(selector);"
+            + " return m && m.imask && !m.imask._cursorChanging; }",
+        inputMaskSelector,
+        new Page.WaitForFunctionOptions().setTimeout(CARET_ASSERT_TIMEOUT_MS));
   }
 
   private void waitForCaretAt(String inputSelector, int expectedPosition) {
