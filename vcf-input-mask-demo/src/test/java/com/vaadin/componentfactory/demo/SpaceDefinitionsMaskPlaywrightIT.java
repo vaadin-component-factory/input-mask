@@ -62,8 +62,8 @@ public class SpaceDefinitionsMaskPlaywrightIT extends AbstractPlaywrightTest {
     assertEquals("", unmaskedValue(RECREATE_FIELD));
 
     input.click();
-    input.pressSequentially("47IND8");
-    assertThat(input).hasValue("47-IND8-   -   -  -      ");
+    input.pressSequentially("12ABC3");
+    assertThat(input).hasValue("12-ABC3-   -   -  -      ");
   }
 
   @Test
@@ -79,8 +79,8 @@ public class SpaceDefinitionsMaskPlaywrightIT extends AbstractPlaywrightTest {
     assertEquals("", unmaskedValue(SWITCH_FIELD));
 
     input.click();
-    input.pressSequentially("47IND8");
-    assertThat(input).hasValue("47-IND8-   -  -      ");
+    input.pressSequentially("12ABC3");
+    assertThat(input).hasValue("12-ABC3-   -  -      ");
   }
 
   @Test
@@ -97,8 +97,8 @@ public class SpaceDefinitionsMaskPlaywrightIT extends AbstractPlaywrightTest {
         "the field must already be focused when the mask is applied");
 
     // Type without clicking: a click would let IMask align the caret itself.
-    page.keyboard().type("47IND8");
-    assertThat(input).hasValue("47-IND8-   -   -  -      ");
+    page.keyboard().type("12ABC3");
+    assertThat(input).hasValue("12-ABC3-   -   -  -      ");
   }
 
   private void openDemo() {
